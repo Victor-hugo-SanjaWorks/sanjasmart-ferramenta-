@@ -1,4 +1,5 @@
 # Deploy automático SanjaWorks — push em main sobe o container do cliente.
+# PR só valida o build (não sobe produção).
 # Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
 # Pasta no servidor: /root/{slug}-rag/ferramenta-{slug}
 name: Deploy
@@ -11,14 +12,31 @@ on:
       - 'docker-compose.yml'
       - 'prompt-cliente.txt'
       - '.github/workflows/deploy.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'docker-compose.yml'
+      - 'prompt-cliente.txt'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.repository }}
+  group: deploy-${{ github.repository }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
+  pr-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build da imagem (validação)
+        run: docker build -t pr-check-${{ github.event.repository.name }} ./app
+
   deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
