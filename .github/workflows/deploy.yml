@@ -1,7 +1,8 @@
 # Deploy automático SanjaWorks — push em main sobe o container do cliente.
 # PR só valida o build (não sobe produção).
 # Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
-# Pasta no servidor: /root/{slug}-rag/ferramenta-{slug}
+# Script no servidor: /root/scripts/saas-deploy-tenant.sh
+# (espelha origin/main, descarta drift local, limpa órfãos, compose up)
 name: Deploy
 
 on:
@@ -52,20 +53,9 @@ jobs:
             set -euo pipefail
             REPO="${{ github.event.repository.name }}"
             SLUG="${REPO#ferramenta-}"
-            DIR="/root/${SLUG}-rag/ferramenta-${SLUG}"
-            if [ ! -d "$DIR" ]; then
-              echo "ERRO: pasta nao encontrada: $DIR"
+            SCRIPT="/root/scripts/saas-deploy-tenant.sh"
+            if [ ! -x "$SCRIPT" ]; then
+              echo "ERRO: script de deploy ausente: $SCRIPT"
               exit 1
             fi
-            cd "$DIR"
-            if [ ! -d .git ]; then
-              echo "ERRO: sem .git em $DIR — configure o remote antes"
-              exit 1
-            fi
-            git remote get-url origin >/dev/null
-            git fetch origin main
-            git checkout -B main origin/main
-            git reset --hard origin/main
-            docker compose up -d --build app
-            docker compose ps app
-            echo "Deploy OK: $SLUG"
+            bash "$SCRIPT" "$SLUG"
