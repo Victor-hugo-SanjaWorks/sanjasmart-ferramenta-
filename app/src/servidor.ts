@@ -31,6 +31,9 @@ import { rotasWhatsappPainel } from './whatsapp-rotas.js';
 import { rotasFilaAtendimento } from './fila-atendimento-rotas.js';
 import { rotasCalendario } from './calendario-rotas.js';
 import { rotasCampanhas } from './campanhas-rotas.js';
+import { rotasMidiasGatilho } from './midias-gatilho-rotas.js';
+import { rotasPromptTools } from './prompt-tools-rotas.js';
+import { garantirMidiasExemplo } from './midias-gatilho-store.js';
 
 const PAGINA_LOGIN = `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8">
@@ -464,6 +467,11 @@ export async function criarServidor() {
     await app.register(rotasCalendario);
   }
   await app.register(rotasCampanhas);
+  await app.register(rotasMidiasGatilho);
+  await app.register(rotasPromptTools);
+  await garantirMidiasExemplo().catch((err) =>
+    console.warn('[midias-gatilho] seed:', err),
+  );
 
   /** Flags de UI (calendário etc.) — phone.html esconde menu conforme isso. */
   app.get('/api/ui-flags', async () => ({

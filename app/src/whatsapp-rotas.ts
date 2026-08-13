@@ -49,27 +49,43 @@ export async function rotasWhatsappPainel(app: FastifyInstance): Promise<void> {
     try {
       const meta = metaDoReq(req);
       if (meta.provider === 'uazapi') {
-        const st = await uazStatus();
-        return {
-          connected: st.conectado,
-          state: st.state,
-          telefone: st.telefone,
-          profileName: st.profileName,
-          instanceName: st.instanceName,
-          provider: 'uazapi',
-        };
+        try {
+          const st = await uazStatus();
+          return {
+            connected: st.conectado,
+            state: st.state,
+            telefone: st.telefone,
+            profileName: st.profileName,
+            instanceName: st.instanceName,
+            provider: 'uazapi',
+          };
+        } catch {
+          return {
+            connected: false,
+            state: 'unknown',
+            unknown: true,
+            provider: 'uazapi',
+            instanceName: meta.name,
+          };
+        }
       }
       const info = await obterInfoInstancia(meta.name);
       return {
         connected: info.connected,
         state: info.state,
+        unknown: info.unknown === true,
         telefone: info.telefone,
         profileName: info.profileName,
         instanceName: info.instanceName,
         provider: 'evolution',
       };
     } catch (err) {
-      return reply.status(502).send({ error: erroWaPublico(err) });
+      return reply.status(502).send({
+        error: erroWaPublico(err),
+        connected: false,
+        state: 'unknown',
+        unknown: true,
+      });
     }
   });
 
@@ -91,7 +107,13 @@ export async function rotasWhatsappPainel(app: FastifyInstance): Promise<void> {
       const info = await obterInfoInstancia(meta.name);
       return { ok: true, ...info, instanceName: meta.name, provider: 'evolution' };
     } catch (err) {
-      return reply.status(502).send({ ok: false, erro: erroWaPublico(err) });
+      return reply.status(502).send({
+        ok: false,
+        erro: erroWaPublico(err),
+        connected: false,
+        state: 'unknown',
+        unknown: true,
+      });
     }
   });
 

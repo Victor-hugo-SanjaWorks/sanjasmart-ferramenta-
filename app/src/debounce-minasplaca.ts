@@ -6,13 +6,14 @@ import { jidParaTelefone } from './util/telefone.js';
 import { logEvento } from './util/log-eventos.js';
 import { gerarRespostaAgente } from './agente-minasplaca.js';
 import { tentarEnviarCanal } from './lib/canal-envio.js';
-import { obterHistorico, adicionarAoHistorico } from './historico-minasplaca.js';
+import { obterHistorico, adicionarAoHistorico, apagarMemoriaIaContato } from './historico-minasplaca.js';
 import { config } from './config.js';
 import type { ItemDebounce } from './lib/tipos.js';
 import { agendarFollowup, cancelarFollowup } from './followup-minasplaca.js';
 import { iaEstaPausada } from './pausa-minasplaca.js';
 import { linhaTemLicencaIa } from './licenca-ia.js';
 import { eUazAtendimento } from './lib/whatsapp-instancias.js';
+import { mensagemEhComandoRecomecar, loteTemComandoRecomecar } from './util/comando-recomecar-atendimento.js';
 
 const redis = obterRedis();
 const PREFIXO_LISTA = 'debounce:lista:';
@@ -20,9 +21,57 @@ const PREFIXO_TIMER = 'debounce:timer:';
 const PREFIXO_LOCK = 'debounce:lock:';
 const TTL = 2 * 60 * 60;
 
+async function limparFilaDebounceContato(telefone: string): Promise<void> {
+  await redis.del(
+    `${PREFIXO_LISTA}${telefone}`,
+    `${PREFIXO_TIMER}${telefone}`,
+    `${PREFIXO_LOCK}${telefone}`,
+  );
+}
+
+/** Comando de sistema: zera memória da IA neste WhatsApp (sem resposta ao cliente). */
+async function executarRecomecarAtendimento(telefone: string, origem: string): Promise<void> {
+  await limparFilaDebounceContato(telefone);
+  await cancelarFollowup(telefone).catch((err) =>
+    console.error('[debounce] erro ao cancelar follow-up no recomeçar:', err),
+  );
+  const r = await apagarMemoriaIaContato(telefone);
+  console.log(
+    `[debounce] comando recomeçar-atendimento (${origem}) — historico zerado para ${r.telefone} (removidas=${r.removidas})`,
+  );
+}
+
+/**
+ * Entrada de webhook/inbound: se for o comando de sistema, zera memória e retorna true.
+ * Bypass de pausa/licença — comando de operador, não mensagem de cliente.
+ */
+export async function tentarComandoRecomecarAtendimento(
+  telefone: string,
+  conteudo: string,
+  origem = 'webhook',
+): Promise<boolean> {
+  if (!mensagemEhComandoRecomecar(conteudo)) return false;
+  try {
+    await executarRecomecarAtendimento(telefone, origem);
+  } catch (err) {
+    console.error('[debounce] falha ao recomeçar atendimento:', err);
+  }
+  return true;
+}
+
+
 export async function adicionarAoDebounce(item: ItemDebounce): Promise<void> {
   const telefone = item.telefone;
   const instance = item.instance || config.evolutionInstance;
+
+  if (mensagemEhComandoRecomecar(item.conteudo || '')) {
+    try {
+      await executarRecomecarAtendimento(telefone, 'enqueue');
+    } catch (err) {
+      console.error('[debounce] falha ao recomeçar atendimento:', err);
+    }
+    return;
+  }
 
   if (!(await linhaTemLicencaIa(instance))) {
     console.log(`[debounce] sem licenca IA na linha ${instance} — nao enfileira`);
@@ -73,6 +122,15 @@ export async function processarContato(remoteJid: string): Promise<void> {
       .map((i) => i.conteudo);
     const mensagem = textos.join('\n\n').trim();
     if (!mensagem) return;
+
+    if (loteTemComandoRecomecar(textos)) {
+      try {
+        await executarRecomecarAtendimento(telefone, 'processar');
+      } catch (err) {
+        console.error('[debounce] falha ao recomeçar atendimento:', err);
+      }
+      return;
+    }
 
     if (await iaEstaPausada(telefone)) {
       console.log(`[debounce] IA pausada para ${telefone} — processamento cancelado`);

@@ -1,6 +1,9 @@
 /**
  * Importa agents do Atendimento para o painel (1 agent = 1 usuário).
  * Espelha exclusão: agent sumiu → apaga conta do iatilit (exceto último admin).
+ *
+ * Fatia B lite: lista Usuários fica em Redis ~45s; sync live só quando stale
+ * ou forceRefresh — evita storm Chatwoot a cada abertura da aba.
  */
 import { gerarSenhaProvisoria } from './credenciais-cofre.js';
 import { listarAgentsAccountApi } from './chatwoot-agents.js';
@@ -8,6 +11,7 @@ import {
   listarDepartamentosChatwoot,
   listarMembrosDepartamento,
 } from './chatwoot-departamentos.js';
+import { obterRedis } from './lib/redis.js';
 import {
   atualizarUsuario,
   criarUsuario,
@@ -17,6 +21,19 @@ import {
   type UsuarioPublico,
 } from './usuarios-store.js';
 
+const CACHE_USUARIOS_KEY = 'painel:usuarios:lista_v1';
+const LOCK_USUARIOS_KEY = 'painel:usuarios:sync_lock';
+/** TTL curto: UX quase ao vivo, sem martelar agents/teams a cada GET. */
+const CACHE_USUARIOS_TTL_SEC = 45;
+
+export async function invalidarCacheUsuariosPainel(): Promise<void> {
+  try {
+    await obterRedis().del(CACHE_USUARIOS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function senhaImportacao(): string {
   const s = gerarSenhaProvisoria();
   if (/[A-Z]/.test(s) && /[a-z]/.test(s) && /\d/.test(s) && /[^A-Za-z0-9]/.test(s)) return s;
@@ -24,11 +41,13 @@ function senhaImportacao(): string {
 }
 
 /** Mapa chatwoot_user_id → departamentos em que o agent é membro. */
-export async function mapaDepartamentosPorAgent(): Promise<
+export async function mapaDepartamentosPorAgent(opts?: {
+  bypassCache?: boolean;
+}): Promise<
   Map<number, Array<{ id: number; name: string }>>
 > {
   const map = new Map<number, Array<{ id: number; name: string }>>();
-  const teams = await listarDepartamentosChatwoot();
+  const teams = await listarDepartamentosChatwoot({ bypassCache: opts?.bypassCache });
   if (!teams.ok || !teams.departamentos) return map;
   for (const t of teams.departamentos) {
     const membros = await listarMembrosDepartamento(t.id);
@@ -49,7 +68,9 @@ export type UsuarioComDeptos = UsuarioPublico & {
  * Garante usuário no painel para cada agent da account.
  * Remove do painel quem tinha vínculo e o agent sumiu no Atendimento.
  */
-export async function sincronizarAgentsNoPainel(): Promise<{
+export async function sincronizarAgentsNoPainel(opts?: {
+  bypassCache?: boolean;
+}): Promise<{
   ok: boolean;
   criados: number;
   vinculados: number;
@@ -57,7 +78,7 @@ export async function sincronizarAgentsNoPainel(): Promise<{
   totalAgents: number;
   motivo?: string;
 }> {
-  const agents = await listarAgentsAccountApi();
+  const agents = await listarAgentsAccountApi({ bypassCache: opts?.bypassCache });
   if (!agents.ok) {
     return {
       ok: false,
@@ -117,31 +138,107 @@ export async function sincronizarAgentsNoPainel(): Promise<{
   return { ok: true, criados, vinculados, removidos, totalAgents: agents.agents.length };
 }
 
-/** Sync + lista com departamentos para a tabela USUÁRIOS. */
-export async function listarUsuariosComDepartamentos(): Promise<{
+export type ListaUsuariosPainel = {
   ok: boolean;
   usuarios: UsuarioComDeptos[];
   sync?: { criados: number; vinculados: number; removidos: number; totalAgents: number };
   motivo?: string;
-}> {
-  const sync = await sincronizarAgentsNoPainel();
-  const deptMap = sync.ok ? await mapaDepartamentosPorAgent() : new Map();
-  const lista = await listarUsuarios();
-  const usuarios: UsuarioComDeptos[] = lista.map((u) => ({
-    ...u,
-    departamentos: u.chatwoot_user_id ? deptMap.get(u.chatwoot_user_id) || [] : [],
-  }));
-  return {
-    ok: true,
-    usuarios,
-    sync: sync.ok
-      ? {
-          criados: sync.criados,
-          vinculados: sync.vinculados,
-          removidos: sync.removidos,
-          totalAgents: sync.totalAgents,
+  cache?: boolean;
+};
+
+/** Sync + lista com departamentos para a tabela USUÁRIOS. */
+export async function listarUsuariosComDepartamentos(opts?: {
+  forceRefresh?: boolean;
+}): Promise<ListaUsuariosPainel> {
+  const redis = obterRedis();
+  const force = opts?.forceRefresh === true;
+
+  if (!force) {
+    try {
+      const raw = await redis.get(CACHE_USUARIOS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as ListaUsuariosPainel;
+        if (parsed?.ok && Array.isArray(parsed.usuarios)) {
+          return { ...parsed, cache: true };
         }
-      : undefined,
-    motivo: sync.ok ? undefined : sync.motivo,
-  };
+      }
+    } catch {
+      /* segue sync */
+    }
+  }
+
+  // Lock evita N abas abertas → N syncs Chatwoot em paralelo.
+  let locked = false;
+  try {
+    const got = await redis.set(LOCK_USUARIOS_KEY, '1', 'EX', 30, 'NX');
+    locked = got === 'OK';
+  } catch {
+    locked = true; // sem Redis: segue sem lock
+  }
+
+  if (!locked) {
+    // Outro sync em andamento — espera cache (até ~5s); senão lê PG + deptos
+    // do cache de teams (sem espelhar agents de novo).
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      try {
+        const raw = await redis.get(CACHE_USUARIOS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as ListaUsuariosPainel;
+          if (parsed?.ok && Array.isArray(parsed.usuarios)) {
+            return { ...parsed, cache: true };
+          }
+        }
+      } catch {
+        break;
+      }
+    }
+    const deptMap = await mapaDepartamentosPorAgent({ bypassCache: false });
+    const listaFallback = await listarUsuarios();
+    return {
+      ok: true,
+      usuarios: listaFallback.map((u) => ({
+        ...u,
+        departamentos: u.chatwoot_user_id ? deptMap.get(u.chatwoot_user_id) || [] : [],
+      })),
+      motivo: 'sync_em_andamento',
+      cache: true,
+    };
+  }
+
+  try {
+    const sync = await sincronizarAgentsNoPainel({ bypassCache: force });
+    const deptMap = sync.ok ? await mapaDepartamentosPorAgent({ bypassCache: force }) : new Map();
+    const lista = await listarUsuarios();
+    const usuarios: UsuarioComDeptos[] = lista.map((u) => ({
+      ...u,
+      departamentos: u.chatwoot_user_id ? deptMap.get(u.chatwoot_user_id) || [] : [],
+    }));
+    const out: ListaUsuariosPainel = {
+      ok: true,
+      usuarios,
+      sync: sync.ok
+        ? {
+            criados: sync.criados,
+            vinculados: sync.vinculados,
+            removidos: sync.removidos,
+            totalAgents: sync.totalAgents,
+          }
+        : undefined,
+      motivo: sync.ok ? undefined : sync.motivo,
+      cache: false,
+    };
+    try {
+      await redis.set(CACHE_USUARIOS_KEY, JSON.stringify(out), 'EX', CACHE_USUARIOS_TTL_SEC);
+    } catch {
+      /* ignore */
+    }
+    return out;
+  } finally {
+    try {
+      await redis.del(LOCK_USUARIOS_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
 }

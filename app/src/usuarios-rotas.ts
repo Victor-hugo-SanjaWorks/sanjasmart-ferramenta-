@@ -14,7 +14,10 @@ import {
   paraPublico,
   type RolePainel,
 } from './usuarios-store.js';
-import { listarUsuariosComDepartamentos } from './usuarios-sync-agents.js';
+import {
+  invalidarCacheUsuariosPainel,
+  listarUsuariosComDepartamentos,
+} from './usuarios-sync-agents.js';
 import {
   desprovisionarAtendimento,
   desprovisionarAtendimentoDoUsuario,
@@ -63,11 +66,14 @@ export async function rotasUsuariosPainel(app: FastifyInstance): Promise<void> {
 
   app.get('/api/ia/usuarios', async (req, reply) => {
     if (!(await exigirAdmin(req, reply))) return;
-    const res = await listarUsuariosComDepartamentos();
+    const q = (req.query || {}) as { sync?: string; force?: string };
+    const forceRefresh = q.sync === '1' || q.force === '1';
+    const res = await listarUsuariosComDepartamentos({ forceRefresh });
     return {
       ok: true,
       usuarios: res.usuarios,
       sync: res.sync || null,
+      cache: res.cache === true,
       aviso: res.motivo ? erroPub(res.motivo) : null,
     };
   });
@@ -156,6 +162,7 @@ export async function rotasUsuariosPainel(app: FastifyInstance): Promise<void> {
           departamentos = { ...departamentos, motivo: erroPub(departamentos.motivo) };
         }
       }
+      await invalidarCacheUsuariosPainel();
       return {
         ok: true,
         usuario,
@@ -230,6 +237,7 @@ export async function rotasUsuariosPainel(app: FastifyInstance): Promise<void> {
         }
       }
 
+      await invalidarCacheUsuariosPainel();
       return { ok: true, usuario, atendimento, departamentos };
     } catch (err) {
       return reply.code(400).send({
@@ -263,6 +271,7 @@ export async function rotasUsuariosPainel(app: FastifyInstance): Promise<void> {
 
     try {
       await excluirUsuario(userId, admin.id);
+      await invalidarCacheUsuariosPainel();
       return {
         ok: true,
         atendimento: { ...atendimento, motivo: erroPub(atendimento.motivo || 'ok') },

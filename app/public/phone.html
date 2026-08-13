@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tilit IA — Painel</title>
+  <title>Sanja Smart — Painel</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/favicon.png">
   <link rel="dns-prefetch" href="https://chat.sanjaworks.com">
@@ -3847,19 +3847,517 @@
         background: var(--glass-bg-strong);
       }
     }
-  </style>
+  
+    /* frota-prompt-secoes-20260812 */
+    .pte-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(17, 18, 36, 0.08);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .pte-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .pte-btn-secao {
+      font-weight: 600;
+      color: #0d7377;
+    }
+    .pte-btn-secao:hover {
+      color: #075f63;
+      background: rgba(13, 115, 119, 0.16) !important;
+    }
+    .pte-btn-auto-fechar.is-on {
+      background: rgba(13, 115, 119, 0.14) !important;
+      color: #0d7377 !important;
+      font-weight: 650;
+    }
+    .pte-btn-auto-fechar.is-on:hover {
+      background: rgba(13, 115, 119, 0.22) !important;
+    }
+    .pte-group-estilo #prompt-color {
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(17, 18, 36, 0.18);
+      border-radius: 6px;
+      padding: 0;
+      cursor: pointer;
+      background: transparent;
+    }
+    .pte-toolbar select,
+    .pte-toolbar #prompt-font-sel,
+    .pte-toolbar #prompt-font-global,
+    .pte-toolbar .pte-select {
+      -webkit-appearance: menulist !important;
+      -moz-appearance: menulist !important;
+      appearance: menulist !important;
+      height: 30px !important;
+      min-width: 72px !important;
+      max-width: none !important;
+      width: auto !important;
+      padding: 0 6px !important;
+      margin: 0 !important;
+      border: 1px solid rgba(17, 18, 36, 0.2) !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      background-image: none !important;
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+      caret-color: #111827 !important;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      font-style: normal !important;
+      letter-spacing: normal !important;
+      line-height: 28px !important;
+      text-transform: none !important;
+      text-indent: 0 !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      vertical-align: middle;
+    }
+    #prompt-font-global {
+      min-width: 96px !important;
+    }
+    #prompt-editor .pl-tam {
+      line-height: 1.25;
+      font-size: inherit;
+    }
+    .pte-hint-bar {
+      display: none;
+      margin: 0;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(13, 115, 119, 0.18);
+      background: linear-gradient(90deg, rgba(13, 115, 119, 0.1), rgba(232, 93, 4, 0.06));
+      color: #1a3a3c;
+      font-size: 13px;
+      line-height: 1.45;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .pte-hint-bar.show { display: flex; }
+    .pte-hint-bar .pte-hint-text { flex: 1; min-width: 0; }
+    .pte-hint-bar .pte-hint-text strong { color: #0d7377; }
+    .pte-hint-bar button {
+      border: 0;
+      background: transparent;
+      color: #5c6170;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+    .pte-toolbar button.pte-btn,
+    .pte-toolbar button.pte-autosave {
+      appearance: none;
+      position: relative;
+      box-sizing: border-box;
+      font-family: inherit;
+      text-transform: none;
+      letter-spacing: 0;
+      line-height: 1;
+      filter: none !important;
+      transform: none !important;
+      box-shadow: none;
+    }
+    .pte-toolbar button.pte-btn::after,
+    .pte-toolbar button.pte-autosave::after { display: none !important; }
+    .pte-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .pte-vsep {
+      width: 1px;
+      height: 22px;
+      background: rgba(17, 18, 36, 0.1);
+      flex-shrink: 0;
+      margin: 0 4px;
+    }
+    .pte-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 32px;
+      min-width: 32px;
+      padding: 0 10px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .12s ease, color .12s ease;
+    }
+    .pte-btn:hover { background: rgba(17, 18, 36, 0.06); color: var(--brand); }
+    .pte-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(223, 98, 159, 0.35); }
+    .pte-btn:disabled { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
+    .pte-btn svg { width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; stroke-width: 2; }
+    .pte-btn-icon { width: 32px; padding: 0; }
+    /* .pte-btn-magic — desativado por enquanto
+    .pte-btn-magic {
+      background: var(--c-pink);
+      color: #fff;
+      padding: 0 14px;
+      font-weight: 600;
+      height: 32px;
+    }
+    .pte-btn-magic:hover { background: #c94e88; color: #fff; }
+    */
+    .pte-btn-mic {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      padding: 0;
+      border: 1px solid rgba(17, 18, 36, 0.12);
+      background: #fff;
+      color: var(--muted);
+    }
+    .pte-btn-mic:hover { border-color: rgba(17, 18, 36, 0.22); background: #fafafa; color: var(--brand); }
+    .pte-btn-mic.recording {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      animation: pte-mic-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes pte-mic-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    }
+    .pte-char-count {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(17, 18, 36, 0.05);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .pte-toolbar-end {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pte-toolbar select,
+    .pte-toolbar #prompt-font-sel,
+    .pte-toolbar #prompt-font-global,
+    .pte-toolbar .pte-select {
+      -webkit-appearance: menulist !important;
+      -moz-appearance: menulist !important;
+      appearance: menulist !important;
+      height: 32px !important;
+      min-width: 118px !important;
+      max-width: none !important;
+      width: auto !important;
+      padding: 0 8px !important;
+      margin: 0 2px !important;
+      border: 1px solid rgba(17, 18, 36, 0.28) !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      background-image: none !important;
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+      caret-color: #111827 !important;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      font-style: normal !important;
+      letter-spacing: normal !important;
+      line-height: 30px !important;
+      text-transform: none !important;
+      text-indent: 0 !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      vertical-align: middle;
+    }
+    .pte-toolbar select option,
+    .pte-toolbar .pte-select option {
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+      background: #fff !important;
+      font-family: ui-sans-serif, system-ui, sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+    }
+    .pte-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 0 2px;
+    }
+    .pte-select-cap {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #6b7280;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      white-space: nowrap;
+    }
+    .pte-hint-bar {
+      display: none;
+      margin: 0;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(13, 115, 119, 0.18);
+      background: linear-gradient(90deg, rgba(13, 115, 119, 0.1), rgba(232, 93, 4, 0.06));
+      color: #1a3a3c;
+      font-size: 13px;
+      line-height: 1.45;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .pte-hint-bar.show { display: flex; }
+    .pte-hint-bar .pte-hint-text { flex: 1; min-width: 0; }
+    .pte-hint-bar .pte-hint-text strong { color: #0d7377; }
+    .pte-hint-bar button {
+      border: 0;
+      background: transparent;
+      color: #5c6170;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+    .pte-saved {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+    .pte-saved.ok {
+      color: #15803d;
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.2);
+    }
+    .pte-saved.pending {
+      color: #a16207;
+      background: rgba(234, 179, 8, 0.1);
+      border-color: rgba(234, 179, 8, 0.2);
+    }
+    .pte-saved.err {
+      color: #b91c1c;
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .pte-saved-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pte-saved.ok .pte-saved-dot { background: #22c55e; }
+    .pte-autosave {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: transparent;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .pte-autosave:hover { background: rgba(17, 18, 36, 0.05); }
+    .pte-autosave-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .pte-autosave-track {
+      width: 32px;
+      height: 16px;
+      border-radius: 999px;
+      background: #d1d5db;
+      position: relative;
+      transition: background .2s;
+    }
+    .pte-autosave-track.on { background: #22c55e; }
+    .pte-autosave-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform .2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .pte-autosave-track.on .pte-autosave-thumb { transform: translateX(16px); }
+    .pte-magic-short { display: none; }
+    @media (max-width: 640px) {
+      .pte-autosave-label { display: none; }
+    }
+    #prompt-editor {
+      flex: 1;
+      width: 100%;
+      min-height: 440px;
+      overflow-y: auto;
+      padding: 16px 18px 24px;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--brand);
+      background: var(--surface);
+      outline: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #prompt-editor:focus { background: #fff; }
+    #prompt-editor:empty::before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #prompt-editor h1 { color: #0d7377; font-size: 1.4em; font-weight: 700; margin: 0; padding: 0; }
+    #prompt-editor h2 { color: #c45a0a; font-size: 1.25em; font-weight: 650; margin: 0; padding: 0; }
+    #prompt-editor.prompt-regua { background-color: #fffef8; }
+
+    /* Seção = pintura de fundo num trecho de linhas. Tudo continua texto. */
+    #prompt-editor .pl {
+      min-height: 1.6em;
+      padding: 0 2px;
+    }
+    #prompt-editor .prompt-sec {
+      margin: 10px 0;
+      padding: 4px 10px 8px;
+      border-left: 4px solid #0d7377;
+      border-radius: 8px;
+      background: rgba(13, 115, 119, 0.07);
+      transition: background 0.15s;
+    }
+    #prompt-editor .prompt-sec .prompt-sec {
+      margin: 8px 4px 8px 14px;
+      border-left-color: #e07a2f;
+      background: rgba(224, 122, 47, 0.075);
+    }
+    #prompt-editor .prompt-sec .prompt-sec .prompt-sec {
+      border-left-color: #6d5cae;
+      background: rgba(109, 92, 174, 0.07);
+    }
+    #prompt-editor .prompt-sec:hover {
+      background: rgba(13, 115, 119, 0.1);
+    }
+    #prompt-editor .prompt-sec .pl-dentro {
+      color: #12303a;
+    }
+    #prompt-editor .pl-marca {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78em;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: #0d7377;
+      opacity: 0.75;
+      padding: 2px 0 2px 1.35em;
+      position: relative;
+    }
+    #prompt-editor .pl-marca-abre {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      min-height: 2.3em;
+      opacity: 1;
+    }
+    #prompt-editor .pl-marca-sintaxe {
+      color: #6d8b8e;
+      font-size: 0.95em;
+      font-weight: 500;
+      opacity: 0.72;
+    }
+    #prompt-editor .pl-titulo {
+      color: #075f63;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      font-size: 2.05em;
+      line-height: 1.25;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+    }
+    #prompt-editor .prompt-sec[data-nivel="2"] > .pl-marca-abre .pl-titulo {
+      color: #b45309;
+      font-size: 1.75em;
+    }
+    #prompt-editor .prompt-sec[data-nivel="3"] > .pl-marca-abre .pl-titulo {
+      color: #5b4a99;
+      font-size: 1.5em;
+    }
+    #prompt-editor .pl-marca-abre::before {
+      content: '▾';
+      position: absolute;
+      left: 2px;
+      top: 0.55em;
+      font-size: 1.15em;
+      color: #0d7377;
+      cursor: pointer;
+      user-select: none;
+    }
+    #prompt-editor .prompt-sec.is-collapsed .pl-marca-abre::before { content: '▸'; }
+    #prompt-editor .prompt-sec.is-collapsed > :not(.pl-marca-abre) { display: none; }
+    #prompt-editor .pl-marca-fecha { padding-left: 1.35em; }
+    #prompt-editor strong { font-weight: 700; color: inherit; }
+    #prompt-editor em { font-style: italic; }
+    #prompt-editor s { text-decoration: line-through; opacity: 0.75; }
+    #prompt-editor code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: rgba(17, 18, 36, 0.06);
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+    #prompt-editor .pl-tam { line-height: 1.25; }
+    #prompt-editor .pl-cor { border-radius: 3px; }
+    #prompt-editor .pl-tool {
+      display: inline;
+      color: #5b21b6;
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(124, 58, 237, 0.28);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+      white-space: nowrap;
+      cursor: default;
+    }
+    #prompt-editor .pl-tool-midia {
+      color: #9a3412;
+      background: rgba(234, 88, 12, 0.12);
+      border-color: rgba(234, 88, 12, 0.3);
+    }
+</style>
+  <link rel="stylesheet" href="midias-gatilho.css?v=20260812a">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Menu principal">
       <div class="sidebar-inner">
         <div class="sidebar-brand">
-          <div class="sidebar-logo" title="Tilit">
-            <img src="/assets/tilit-logo.png?v=2" alt="Tilit">
+          <div class="sidebar-logo" title="Sanja Smart">
+            <img src="/assets/tilit-logo.png?v=2" alt="Sanja Smart">
           </div>
           <div>
-            <div class="sidebar-brand-text">Painel IA</div>
-            <div class="sidebar-brand-sub">Tilit</div>
+            <div class="sidebar-brand-text">Sanja Smart</div>
+            <div class="sidebar-brand-sub">Sanja Smart</div>
           </div>
           <button type="button" id="sidebar-recolher" title="Recolher menu (tela cheia no mobile também)" aria-label="Recolher menu" onclick="alternarSidebar(true)">«</button>
         </div>
@@ -3957,7 +4455,7 @@
           <header class="ops-header">
             <div>
               <h1 class="dash-title" id="dash-greeting">Olá!</h1>
-              <p class="dash-sub" id="dash-sub">Console do assistente — Tilit</p>
+              <p class="dash-sub" id="dash-sub">Console do assistente — Sanja Smart</p>
             </div>
             <div class="ops-status-strip" role="status">
               <span class="ops-chip" id="dash-pill-whatsapp">
@@ -4047,7 +4545,7 @@
                   <h2 class="ops-panel-title">WhatsApp</h2>
                   <p class="ops-panel-sub">Conexão do número de envio</p>
                 </div>
-                <span id="instance-badge" class="badge closed">Verificando</span>
+                <span id="instance-badge" class="badge warn">Verificando…</span>
               </div>
               <div class="ops-panel-body">
                 <div class="ops-wa-state" id="hero-wa-state">—</div>
@@ -4231,54 +4729,113 @@
           <header class="dash-header prompt-view-header">
             <div>
               <h1 class="dash-title">Prompt do sistema</h1>
-              <p class="dash-sub">Instruções completas da IA — edite e salve</p>
+              <p class="dash-sub">Edite seções e salve — a IA reage na próxima mensagem</p>
             </div>
           </header>
           <div class="card card-tint-rose prompt-editor-card" id="card-prompt">
             <div class="card-shell">
               <div class="card-body">
                 <div class="pte-toolbar">
-                  <div class="pte-group">
-                    <button type="button" class="pte-btn pte-btn-icon" title="Desfazer (Ctrl+Z)" onclick="promptUndo()">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-                    </button>
-                    <button type="button" class="pte-btn pte-btn-icon" id="prompt-redo-btn" title="Refazer (Ctrl+Y)" onclick="promptRedo()" disabled>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"/></svg>
-                    </button>
-                  </div>
-                  <div class="pte-vsep"></div>
-                  <div class="pte-group">
-                    <button type="button" class="pte-btn pte-btn-icon" title="Negrito (Ctrl+B)" onclick="promptFormat('bold')">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg>
-                    </button>
-                    <button type="button" class="pte-btn pte-btn-icon" title="Itálico (Ctrl+I)" onclick="promptFormat('italic')">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg>
-                    </button>
-                    <button type="button" class="pte-btn pte-btn-icon" title="Sublinhado (Ctrl+U)" onclick="promptFormat('underline')">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="20" y2="20"/></svg>
-                    </button>
-                    <button type="button" class="pte-btn pte-btn-icon" title="Tachado" onclick="promptFormat('strikeThrough')">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/></svg>
-                    </button>
-                  </div>
-                  <div class="pte-vsep"></div>
-                  <button type="button" class="pte-btn pte-btn-magic" title="Assistente de IA" onclick="abrirAiMagic()">
-                    <span class="pte-magic-full">✨ AI Magic</span>
-                    <span class="pte-magic-short">✨</span>
-                  </button>
-                  <button type="button" class="pte-btn pte-btn-mic pte-btn-icon" id="prompt-mic-btn" title="Gravar áudio (clique para iniciar/parar)" onclick="promptToggleMic()">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                  </button>
-                  <div class="pte-vsep"></div>
-                  <div class="pte-char-count" id="prompt-char-count">0 caracteres</div>
-                  <div class="pte-toolbar-end">
-                    <span class="pte-saved ok" id="prompt-save-badge"><span class="pte-saved-dot"></span>Salvo</span>
+                  <div class="pte-bar">
+                    <div class="pte-group" title="Histórico">
+                      <button type="button" class="pte-btn pte-btn-icon" title="Desfazer (Ctrl+Z)" onclick="promptUndo()">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-icon" id="prompt-redo-btn" title="Refazer (Ctrl+Y)" onclick="promptRedo()" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                      </button>
+                    </div>
+
                     <div class="pte-vsep"></div>
+
+                    <div class="pte-group" title="Formatação">
+                      <button type="button" class="pte-btn pte-btn-icon" title="Negrito (Ctrl+B)" onclick="promptFormat('bold')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-icon" title="Itálico (Ctrl+I)" onclick="promptFormat('italic')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-icon" title="Tachado" onclick="promptFormat('strikeThrough')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/></svg>
+                      </button>
+                    </div>
+
+                    <div class="pte-vsep"></div>
+
+                    <div class="pte-group" title="Seções">
+                      <button type="button" class="pte-btn pte-btn-secao" title="Criar seção no trecho/linha" onclick="teaPromptEditorUx&&teaPromptEditorUx.formatTitulo()">Seção</button>
+                      <button type="button" class="pte-btn pte-btn-icon" title="Fechar todas as seções" onclick="teaPromptEditorUx&&teaPromptEditorUx.minimizarSecoes()" aria-label="Fechar seções">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12"/><path d="M6 12h12"/><path d="M6 16h8"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-icon" title="Abrir todas as seções" onclick="teaPromptEditorUx&&teaPromptEditorUx.expandirSecoes()" aria-label="Abrir seções">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12"/><path d="M6 12h12"/><path d="M6 17h12"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-auto-fechar" id="prompt-auto-fechar-btn" aria-pressed="false" title="Auto fechar: no reload, seções começam fechadas" onclick="teaPromptEditorUx&&teaPromptEditorUx.toggleAutoFecharSecoes()">Auto</button>
+                    </div>
+
+                    <div class="pte-vsep"></div>
+
+                    <div class="pte-group pte-group-estilo" title="Estilo (não vai para a IA)">
+                      <input type="color" id="prompt-color" title="Cor: seleção = texto; sem seleção na seção = cor da seção" value="#0d7377" onchange="teaPromptEditorUx&&teaPromptEditorUx.aplicarCor(this.value)" />
+                      <select class="pte-select" id="prompt-font-sel" title="Tamanho do texto (selecione linhas ou deixe o cursor na linha)" onchange="if(this.value)teaPromptEditorUx&&teaPromptEditorUx.aplicarTamanhoSelecao(this.value)">
+                        <option value="" selected disabled>Tam</option>
+                        <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                        <option value="24">24</option>
+                        <option value="28">28</option>
+                        <option value="32">32</option>
+                      </select>
+                      <select class="pte-select" id="prompt-font-global" title="Zoom de leitura do editor inteiro" onchange="teaPromptEditorUx&&teaPromptEditorUx.aplicarFonteGlobal(this.value)">
+                        <option value="10">Zoom 10</option>
+                        <option value="12">Zoom 12</option>
+                        <option value="13">Zoom 13</option>
+                        <option value="14">Zoom 14</option>
+                        <option value="15" selected>Zoom 15</option>
+                        <option value="16">Zoom 16</option>
+                        <option value="18">Zoom 18</option>
+                        <option value="20">Zoom 20</option>
+                        <option value="24">Zoom 24</option>
+                        <option value="28">Zoom 28</option>
+                        <option value="32">Zoom 32</option>
+                      </select>
+                      <button type="button" class="pte-btn pte-btn-icon pte-btn-regua" title="Linhas guia" onclick="teaPromptEditorUx&&teaPromptEditorUx.toggleRegua()" aria-label="Linhas guia">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                      </button>
+                    </div>
+
+                    <div class="pte-vsep"></div>
+
+                    <div class="pte-group pte-group-tools">
+                      <button type="button" class="pte-btn pte-btn-icon" title="Upload de documento" onclick="promptDocsAbrirArquivo()" aria-label="Upload">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                      </button>
+                      <button type="button" class="pte-btn" title="Documentos indexados" onclick="promptDocsTogglePainel()">Docs</button>
+                      <button type="button" class="pte-btn" title="Inserir gatilho no prompt" onmousedown="window.capturarAlvoInsercaoPrompt&&window.capturarAlvoInsercaoPrompt()" onclick="window.capturarAlvoInsercaoPrompt&&window.capturarAlvoInsercaoPrompt();teaMidiasGatilho&&teaMidiasGatilho.abrirInserirNoPrompt()">Gatilhos</button>
+                      <button type="button" class="pte-btn pte-btn-magic" title="Assistente de IA" onclick="abrirAiMagic()">
+                        <span class="pte-magic-full">✨ Magic</span>
+                        <span class="pte-magic-short">✨</span>
+                      </button>
+                      <button type="button" class="pte-btn pte-btn-mic pte-btn-icon" id="prompt-mic-btn" title="Gravar áudio" onclick="promptToggleMic()" aria-label="Microfone">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="pte-toolbar-end">
+                    <div class="pte-char-count" id="prompt-char-count">0</div>
+                    <span class="pte-saved ok" id="prompt-save-badge"><span class="pte-saved-dot"></span>Salvo</span>
                     <button type="button" class="pte-autosave" id="prompt-autosave-btn" onclick="togglePromptAutosave()" title="Alternar autosave">
                       <span class="pte-autosave-track on" id="prompt-autosave-track"><span class="pte-autosave-thumb"></span></span>
-                      <span class="pte-autosave-label">Autosave</span>
+                      <span class="pte-autosave-label">Auto</span>
                     </button>
                   </div>
+                </div>
+                <div class="pte-hint-bar" id="prompt-tool-hint" role="status" aria-live="polite">
+                  <div class="pte-hint-text" id="prompt-tool-hint-text"></div>
+                  <button type="button" title="Fechar dica" onclick="document.getElementById('prompt-tool-hint')&&document.getElementById('prompt-tool-hint').classList.remove('show')">×</button>
                 </div>
                 <div id="prompt-editor" contenteditable="true" spellcheck="false" data-placeholder="Carregando prompt..."></div>
               </div>
@@ -4289,6 +4846,9 @@
 
       <div id="view-conversas" class="view">
         <div class="chat-wrap">
+          <div class="chat-toolbar" id="chat-toolbar" style="display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border,rgba(0,0,0,.08));flex-shrink:0;">
+            <button type="button" class="secondary" id="btn-atualizar-conversas" onclick="atualizarConversasChatwoot()" title="Recarrega as conversas (SSO fresco)">Atualizar conversas</button>
+          </div>
           <div class="chat-fallback" id="chat-fallback">
             <span id="chat-fallback-msg">Não foi possível carregar as conversas no painel.</span>
             <a id="chatwoot-fallback" href="#" target="_blank" rel="noopener noreferrer">Abrir conversas em nova aba ↗</a>
@@ -4297,7 +4857,7 @@
           <iframe
             id="chatwoot-frame"
             src="about:blank"
-            title="Conversas — Tilit"
+            title="Conversas — Sanja Smart"
             allow="microphone; clipboard-read; clipboard-write; autoplay"
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
@@ -4627,7 +5187,7 @@
                   <p class="aba-desc" id="usuario-atendimento-hint" style="margin:0 0 10px">
                     Cada login entra no Atendimento (aba Conversas) só com a conta dele.
                     Perfil Administrador aqui vira administrador no Atendimento; Atendente vira agente.
-                    Criar/apagar no painel cria/remove o atendente na conta Tilit (mesmo e-mail).
+                    Criar/apagar no painel cria/remove o atendente na conta Sanja Smart (mesmo e-mail).
                   </p>
                   <label class="senha-check-row" id="usuario-ativo-wrap" for="usuario-ativo" style="display:none">
                     <span>Permitir login<span class="aba-desc">Desative para bloquear o acesso ao painel</span></span>
@@ -4717,7 +5277,8 @@
   </div>
 
   <script src="/js/fila-config-ui.js"></script>
-  <script>
+    <script src="js/aba-rota.js"></script>
+<script>
     let chatwootSsoUrl = null;
 
     let perfilAtual = null;
@@ -4742,6 +5303,7 @@
           if (sub) sub.textContent = data.email;
         }
         aplicarPermissoesAbas(data);
+        if (typeof restaurarAbaPersistida === 'function') restaurarAbaPersistida();
       } catch (e) { console.warn('perfil', e); }
     }
 
@@ -5156,7 +5718,7 @@
     }
 
     async function excluirUsuario(id) {
-      if (!confirm('Excluir este usuário do painel e do Atendimento (conta Tilit)?')) return;
+      if (!confirm('Excluir este usuário do painel e do Atendimento (conta Sanja Smart)?')) return;
       try {
         const res = await fetch('/api/ia/usuarios/' + id, { method: 'DELETE', credentials: 'same-origin' });
         const data = await res.json();
@@ -5330,17 +5892,19 @@
     })();
 
     function switchView(view) {
+      view = (window.AbaRota && AbaRota.validar(view)) || view;
       document.querySelectorAll('.view').forEach(function (el) {
         el.classList.toggle('active', el.id === 'view-' + view);
       });
       document.querySelectorAll('.nav-item').forEach(function (btn) {
         btn.classList.toggle('active', btn.getAttribute('data-view') === view);
       });
+      if (window.AbaRota) AbaRota.salvar(view);
       if (view !== 'prompt' && promptRecording && promptRecognition) {
         promptRecognition.stop();
       }
       if (view === 'conversas') {
-        carregarChatwootSso();
+        carregarChatwootSso(false);
       }
       if (view === 'prompt' && !promptCarregado) {
         carregarPromptPainel();
@@ -5368,6 +5932,29 @@
         garantirCampanhasFrame();
       }
     }
+
+    /** Refresh / deep-link: reabre a aba salva sem travar a SPA. */
+    function restaurarAbaPersistida() {
+      var want = (window.AbaRota && AbaRota.resolver('assistente')) || 'assistente';
+      if (want === 'calendario' && window.__UI_FLAGS__ && window.__UI_FLAGS__.calendario === false) {
+        want = 'assistente';
+      }
+      if (want === 'calendario' && !window.__UI_FLAGS__) {
+        return; /* espera /api/ui-flags */
+      }
+      var atual = window.AbaRota && AbaRota.abaAtualNoDom();
+      if (atual === want) {
+        switchView(want);
+        return;
+      }
+      switchView(want);
+    }
+
+    window.addEventListener('popstate', function () {
+      if (!window.AbaRota) return;
+      var fromUrl = AbaRota.lerDaUrl();
+      if (fromUrl && fromUrl !== AbaRota.abaAtualNoDom()) switchView(fromUrl);
+    });
 
     function garantirCrmFrame() {
       var frame = document.getElementById('crm-frame');
@@ -5402,7 +5989,8 @@
       frame.src = '/campanhas/?v=' + Date.now();
     }
 
-    async function carregarChatwootSso() {
+    var _cwSsoInflight = null;
+    async function carregarChatwootSso(forcar) {
       const frame = document.getElementById('chatwoot-frame');
       const loading = document.getElementById('chat-loading');
       const fallback = document.getElementById('chat-fallback');
@@ -5410,12 +5998,24 @@
       const fallbackMsg = document.getElementById('chat-fallback-msg');
       if (!frame) return;
 
+      const srcAtual = frame.getAttribute('src') || '';
+      const jaOk = frame.getAttribute('data-cw-ok') === '1'
+        && srcAtual
+        && srcAtual !== 'about:blank';
+      if (!forcar && jaOk) {
+        if (loading) loading.classList.add('hidden');
+        if (fallback) fallback.classList.remove('visible');
+        return;
+      }
+      if (!forcar && _cwSsoInflight) return _cwSsoInflight;
+
       if (loading) {
-        loading.textContent = 'Conectando às conversas…';
+        loading.textContent = forcar ? 'Atualizando conversas…' : 'Conectando às conversas…';
         loading.classList.remove('hidden');
       }
       if (fallback) fallback.classList.remove('visible');
-
+      frame.setAttribute('data-cw-ok', '0');
+      _cwSsoInflight = (async function () {
       try {
         const res = await fetch('/api/chatwoot/sso', { credentials: 'same-origin' });
         const data = await res.json();
@@ -5424,7 +6024,12 @@
         }
         chatwootSsoUrl = data.iframeUrl;
         if (fallbackLink) fallbackLink.href = data.iframeUrl;
-        frame.src = data.iframeUrl;
+        if (frame.getAttribute('src') !== data.iframeUrl) {
+          frame.src = data.iframeUrl;
+        } else {
+          frame.setAttribute('data-cw-ok', '1');
+          if (loading) loading.classList.add('hidden');
+        }
       } catch (err) {
         if (loading) {
           loading.textContent = 'Erro ao conectar: ' + err.message;
@@ -5435,7 +6040,14 @@
         if (fallbackLink && chatwootSsoUrl) fallbackLink.href = chatwootSsoUrl;
         if (fallback) fallback.classList.add('visible');
       }
+      })().finally(function () { if (_cwSsoInflight) _cwSsoInflight = null; });
+      return _cwSsoInflight;
     }
+
+    function atualizarConversasChatwoot() {
+      return carregarChatwootSso(true);
+    }
+    window.atualizarConversasChatwoot = atualizarConversasChatwoot;
 
     (function initChatwootFrame() {
       const frame = document.getElementById('chatwoot-frame');
@@ -5443,6 +6055,7 @@
       if (!frame) return;
       frame.addEventListener('load', function () {
         if (!frame.src || frame.src === 'about:blank') return;
+        frame.setAttribute('data-cw-ok', '1');
         if (loading) loading.classList.add('hidden');
       });
     })();
@@ -6153,10 +6766,16 @@
       carregarLogs();
     }
 
-    function iniciarPainelEventos() {
-      if (window._painelEventSource) return;
+    function iniciarPainelEventos(forcar) {
+      if (window._painelEsStopped) return;
+      if (window._painelEventSource) {
+        if (!forcar) return;
+        try { window._painelEventSource.close(); } catch (_) {}
+        window._painelEventSource = null;
+      }
       const es = new EventSource('/api/ia/painel/eventos');
       window._painelEventSource = es;
+      es.addEventListener('ready', function () { window._painelEsFails = 0; window._painelEsOk = true; });
       es.addEventListener('painel', function (ev) {
         try {
           const evento = JSON.parse(ev.data);
@@ -6168,11 +6787,17 @@
       es.addEventListener('error', function () {
         es.close();
         window._painelEventSource = null;
-        setTimeout(iniciarPainelEventos, 3000);
+        /* frota-veloz-20260811 */
+        window._painelEsOk = false;
+        window._painelEsFails = (window._painelEsFails || 0) + 1;
+        if (window._painelEsFails > 15) { window._painelEsStopped = true; return; }
+        var _delay = Math.min(60000, Math.round(3000 * Math.pow(1.6, window._painelEsFails - 1)));
+        setTimeout(function () { if (!window._painelEsStopped) iniciarPainelEventos(false); }, _delay);
       });
     }
 
     async function syncTelefoneRapido() {
+      if (document.hidden) return;
       const tel = telefonePausaInput();
       if (!tel || tel.replace(/\D/g, '').length < 10) return;
       try {
@@ -6857,21 +7482,70 @@
       await fetchInstanceStatus();
     }
 
-    async function fetchInstanceStatus() {
+    async function fetchInstanceStatus(opts) {
+      opts = opts || {};
+      var forcar = opts.forcar === true;
+      var agora = Date.now();
+      var TTL_BADGE_MS = 10000; // 5–15s: só visual; IA NÃO usa este cache
+      var cache = window.__waBadgeCache;
+      if (!forcar && cache && (agora - cache.at) < TTL_BADGE_MS) {
+        pintarBadgeSomente(cache.klass, cache.text, cache.telefone);
+        console.info('[status]', { fonte: 'badge-cache', ageMs: agora - cache.at, unknown: !!cache.unknown });
+        return;
+      }
       try {
         const res = await fetch('/api/whatsapp/status', { credentials: 'same-origin' });
-        if (!res.ok) throw new Error('Status não disponível');
-        const data = await res.json();
-        setBadge(
-          data.connected ? 'open' : 'closed',
-          data.connected ? 'Conectado' : 'Desconectado',
-          data.telefone,
-        );
+        const data = await res.json().catch(function () { return {}; });
+        if (!res.ok) {
+          var k1 = 'warn';
+          var t1 = data.unknown ? 'Verificando…' : 'Indisponível';
+          setBadge(k1, t1);
+          window.__waBadgeCache = { at: Date.now(), klass: k1, text: t1, telefone: null, unknown: true, connected: false };
+          console.info('[status]', { fonte: 'api', ok: false, unknown: true });
+          return;
+        }
+        if (data.unknown === true || String(data.state || '').toLowerCase() === 'unknown') {
+          setBadge('warn', 'Verificando…', data.telefone);
+          window.__waBadgeCache = { at: Date.now(), klass: 'warn', text: 'Verificando…', telefone: data.telefone || null, unknown: true, connected: false };
+          console.info('[status]', { fonte: 'api', unknown: true, state: data.state || null });
+          return;
+        }
+        var connected = data.connected === true || data.conectado === true;
+        var klass = connected ? 'open' : 'closed';
+        var text = connected ? 'Conectado' : 'Desconectado';
+        setBadge(klass, text, data.telefone || data.numeroConectado);
+        window.__waBadgeCache = { at: Date.now(), klass: klass, text: text, telefone: data.telefone || data.numeroConectado || null, unknown: false, connected: connected };
+        console.info('[status]', { fonte: 'api', connected: connected, unknown: false });
       } catch (err) {
         setBadge('warn', 'Indisponível');
+        window.__waBadgeCache = { at: Date.now(), klass: 'warn', text: 'Indisponível', telefone: null, unknown: true, connected: false };
+        console.info('[status]', { fonte: 'api', erro: String(err && err.message || err), unknown: true });
       }
       const lu = document.getElementById('last-update');
       if (lu) lu.textContent = new Date().toLocaleString('pt-BR');
+    }
+
+    /** Atualiza só o DOM do badge — NÃO altera window.__waConnected (fail-closed da IA). */
+    function pintarBadgeSomente(klass, text, telefone) {
+      const b = document.getElementById('instance-badge');
+      if (b) {
+        b.className = 'badge ' + klass;
+        b.textContent = text;
+      }
+      const dot = document.getElementById('dash-dot-whatsapp');
+      const pillText = document.getElementById('dash-text-whatsapp');
+      if (dot && pillText) {
+        dot.className = 'dash-pill-dot ' + (klass === 'open' ? 'ok' : klass === 'closed' ? 'off' : 'wait');
+        let label = 'WhatsApp: ' + text;
+        if (klass === 'open' && telefone && typeof formatarTelefoneBrDisplay === 'function') {
+          label = 'WhatsApp: ' + formatarTelefoneBrDisplay(telefone);
+        }
+        pillText.textContent = label;
+      }
+      const heroWa = document.getElementById('hero-wa-state');
+      if (heroWa) {
+        heroWa.textContent = klass === 'open' ? 'Conectado' : klass === 'closed' ? 'Desconectado' : (text || 'Indisponível');
+      }
     }
 
     function setBadge(klass, text, telefone) {
@@ -6896,7 +7570,7 @@
       }
       const heroWa = document.getElementById('hero-wa-state');
       if (heroWa) {
-        heroWa.textContent = klass === 'open' ? 'Conectado' : klass === 'closed' ? 'Desconectado' : 'Indisponível';
+        heroWa.textContent = klass === 'open' ? 'Conectado' : klass === 'closed' ? 'Desconectado' : (text || 'Indisponível');
       }
       const num = document.getElementById('connected-number');
       if (num && telefone) num.textContent = formatarTelefoneBrDisplay(telefone);
@@ -7068,9 +7742,15 @@
     let promptSaveTimer = null;
     let promptRecognition = null;
     let promptRecording = false;
+    // Versao do prompt que esta tela carregou: impede salvar por cima de quem salvou depois.
+    let promptVersaoBase = '';
 
     function promptEl() {
       return document.getElementById('prompt-editor');
+    }
+
+    function promptMarkup() {
+      return window.teaPromptMarkup || null;
     }
 
     function promptEscapeHtml(s) {
@@ -7078,6 +7758,8 @@
     }
 
     function promptHtmlToMarkdown(html) {
+      const m = promptMarkup();
+      if (m && m.htmlEditorParaTexto) return m.htmlEditorParaTexto(html);
       const div = document.createElement('div');
       div.innerHTML = html;
       function walk(node) {
@@ -7089,21 +7771,24 @@
         }
         const inner = Array.from(node.childNodes).map(walk).join('');
         const tag = node.nodeName;
-        if (tag === 'B' || tag === 'STRONG') return '**' + inner + '**';
-        if (tag === 'I' || tag === 'EM') return '*' + inner + '*';
-        if (tag === 'U') return '__' + inner + '__';
-        if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') return '~~' + inner + '~~';
+        if (tag === 'B' || tag === 'STRONG') return '*' + inner + '*';
+        if (tag === 'I' || tag === 'EM') return '_' + inner + '_';
+        if (tag === 'U') return '_' + inner + '_';
+        if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') return '~' + inner + '~';
         return inner;
       }
       return Array.from(div.childNodes).map(walk).join('').replace(/\n{3,}/g, '\n\n');
     }
 
     function promptMarkdownToHtml(text) {
+      const m = promptMarkup();
+      if (m && m.textoParaHtmlEditor) return m.textoParaHtmlEditor(text);
       const lines = text.split('\n');
       return lines.map(function (line) {
         const esc = promptEscapeHtml(line);
         return esc
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<strong>$2</strong>')
           .replace(/~~(.+?)~~/g, '<s>$1</s>')
           .replace(/__(.+?)__/g, '<u>$1</u>')
           .replace(/(?<![*\w])\*([^*\n]+?)\*(?![*\w])/g, '<em>$1</em>');
@@ -7116,15 +7801,73 @@
       return promptHtmlToMarkdown(el.innerHTML);
     }
 
-    function promptSetContent(text) {
+    function promptSetContent(text, opts) {
       const el = promptEl();
       if (!el) return;
-      const hasMd = /\*\*|~~|__/.test(text) || /(?<![*\w])\*[^*\n]+\*(?![*\w])/.test(text);
-      if (hasMd) {
-        el.innerHTML = promptMarkdownToHtml(text);
+      const m = promptMarkup();
+      let txt = text || '';
+      if (m && m.normalizarMarkup) txt = m.normalizarMarkup(txt);
+      if (window.teaPromptEditorUx && teaPromptEditorUx.definirTexto) {
+        teaPromptEditorUx.definirTexto(txt, opts || { restaurarColapso: true });
+      } else if (m && m.textoParaHtmlEditor) {
+        el.innerHTML = m.textoParaHtmlEditor(txt);
       } else {
-        el.textContent = text;
+        el.textContent = txt;
       }
+    }
+
+    function promptBindMarkupClipboard() {
+      const el = promptEl();
+      if (!el || el.dataset.markupClipBound) return;
+      el.dataset.markupClipBound = '1';
+
+      el.addEventListener('copy', function (e) {
+        const texto = promptGetSerialized();
+        if (!texto) return;
+        // Se há seleção parcial, serializa só o HTML selecionado quando possível
+        const sel = window.getSelection();
+        let out = texto;
+        if (sel && sel.rangeCount && !sel.isCollapsed && el.contains(sel.anchorNode)) {
+          try {
+            const range = sel.getRangeAt(0);
+            const div = document.createElement('div');
+            div.appendChild(range.cloneContents());
+            out = promptHtmlToMarkdown(div.innerHTML) || texto;
+          } catch (_) {}
+        }
+        if (e.clipboardData) {
+          e.clipboardData.setData('text/plain', out);
+          e.preventDefault();
+        }
+      });
+
+      el.addEventListener('paste', function (e) {
+        const m = promptMarkup();
+        const raw = (e.clipboardData && e.clipboardData.getData('text/plain')) || '';
+        if (!raw || !m) return;
+        if (!m.pareceMarkupPrompt(raw) && !m.temMarcadoresSecao(raw)) {
+          // cola texto puro sem reparse completo do documento
+          return;
+        }
+        e.preventDefault();
+        const sel = window.getSelection();
+        const temSel = sel && sel.rangeCount && !sel.isCollapsed && el.contains(sel.anchorNode);
+        if (temSel) {
+          // substitui só a seleção pelo trecho interpretado (inline/seção)
+          const htmlFrag = m.textoParaHtmlEditor(raw);
+          document.execCommand('insertHTML', false, htmlFrag);
+        } else {
+          // se o editor está “vazio” ou colou um prompt inteiro com seções, reinterpreta o doc
+          const atual = promptGetSerialized().trim();
+          if (!atual || m.temMarcadoresSecao(raw) || /^#{2,4}\s+/m.test(raw)) {
+            promptSetContent(raw);
+          } else {
+            document.execCommand('insertHTML', false, m.textoParaHtmlEditor(raw));
+          }
+        }
+        if (window.teaPromptEditorUx) teaPromptEditorUx.estruturarDobras();
+        promptOnInput();
+      });
     }
 
     function setPromptSaveBadge(state, text) {
@@ -7134,21 +7877,118 @@
       el.innerHTML = '<span class="pte-saved-dot"></span>' + text;
     }
 
+    const PROMPT_MARCA_CMD = {
+      bold: '*',
+      italic: '_',
+      underline: '_',
+      strikeThrough: '~',
+    };
+
     function promptFormat(cmd) {
       const el = promptEl();
       if (!el) return;
       el.focus();
+      const marca = PROMPT_MARCA_CMD[cmd];
+      if (marca && window.teaPromptEditorUx) {
+        teaPromptEditorUx.envolverInline(marca);
+        return;
+      }
       document.execCommand(cmd, false, null);
       promptOnInput();
     }
 
+    /** Última linha do caret no editor — sobrevive ao clique em Gatilhos/modal. */
+    let promptCaretLinha = null;
+
+    function atualizarPromptCaretLinha() {
+      const el = promptEl();
+      if (!el) return;
+      const sel = window.getSelection();
+      if (!sel || !sel.anchorNode || !el.contains(sel.anchorNode)) return;
+      const n = sel.anchorNode;
+      const elN = n.nodeType === 1 ? n : n.parentElement;
+      const pl = elN && elN.closest ? elN.closest('.pl') : null;
+      if (!pl) return;
+      const all = Array.prototype.slice.call(el.querySelectorAll('.pl'));
+      const i = all.indexOf(pl);
+      if (i >= 0) promptCaretLinha = i;
+    }
+
+    document.addEventListener('selectionchange', atualizarPromptCaretLinha);
+
     function promptInsertText(text) {
       const el = promptEl();
       if (!el) return;
+      const chunk = String(text == null ? '' : text);
+      if (!chunk) return;
       el.focus();
-      document.execCommand('insertText', false, text);
+
+      /* NUNCA execCommand no DOM de seções: quebra ~fim~ e aninha blocos.
+       * Usa a última linha do caret (antes do modal) para inserir DENTRO da seção. */
+      if (window.teaPromptEditorUx && teaPromptEditorUx.obterTexto && teaPromptEditorUx.definirTexto) {
+        const atual = teaPromptEditorUx.obterTexto();
+        const linhas = atual.split('\n');
+        let idx = Math.max(0, linhas.length - 1);
+
+        atualizarPromptCaretLinha();
+        if (typeof promptCaretLinha === 'number' && promptCaretLinha >= 0) {
+          idx = Math.min(promptCaretLinha, linhas.length - 1);
+        } else {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount && sel.anchorNode && el.contains(sel.anchorNode)) {
+            const n = sel.anchorNode;
+            const elN = n.nodeType === 1 ? n : n.parentElement;
+            const pl = elN && elN.closest ? elN.closest('.pl') : null;
+            if (pl) {
+              const all = Array.prototype.slice.call(el.querySelectorAll('.pl'));
+              const i = all.indexOf(pl);
+              if (i >= 0) idx = i;
+            }
+          }
+        }
+
+        const linhaAtual = String(linhas[idx] || '');
+        const ehFim = /^\s*~fim da seção:/i.test(linhaAtual);
+        const ehAbertura = /^\s*~abertura da seção:/i.test(linhaAtual);
+        const blocos = chunk
+          .replace(/\r\n/g, '\n')
+          .replace(/^\n+/, '')
+          .replace(/\n+$/, '')
+          .split('\n');
+        if (!blocos.length || (blocos.length === 1 && blocos[0] === '')) {
+          return;
+        }
+
+        let before;
+        let after;
+        if (ehFim) {
+          /* Cursor no ~fim~ → entra ANTES, dentro da seção. */
+          before = linhas.slice(0, idx);
+          after = linhas.slice(idx);
+        } else if (ehAbertura) {
+          before = linhas.slice(0, idx + 1);
+          after = linhas.slice(idx + 1);
+        } else if (!linhaAtual.trim()) {
+          before = linhas.slice(0, idx);
+          after = linhas.slice(idx + 1);
+        } else {
+          /* Depois da linha do cursor (ex.: fim de "adsadasdas"). */
+          before = linhas.slice(0, idx + 1);
+          after = linhas.slice(idx + 1);
+        }
+
+        const novo = before.concat(blocos).concat(after).join('\n');
+        teaPromptEditorUx.definirTexto(novo, { restaurarColapso: true });
+        promptCaretLinha = Math.min(before.length + blocos.length - 1, novo.split('\n').length - 1);
+        promptOnInput();
+        return;
+      }
+
+      document.execCommand('insertText', false, chunk);
       promptOnInput();
     }
+    window.promptInsertText = promptInsertText;
+    window.capturarAlvoInsercaoPrompt = atualizarPromptCaretLinha;
 
     function promptToggleMic() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -7197,7 +8037,9 @@
       const countEl = document.getElementById('prompt-char-count');
       if (!el || !countEl) return;
       const len = (el.innerText || '').length;
+      // Soft hint 100k — sem bloquear digitacao/salvamento.
       countEl.textContent = len.toLocaleString('pt-BR') + ' caracteres';
+      countEl.style.color = len > 100000 ? '#b42318' : '';
     }
 
     function promptPushHistory(val, reset) {
@@ -7238,7 +8080,7 @@
       setPromptSaveBadge('pending', 'Alterado');
       if (promptAutosave) {
         clearTimeout(promptSaveTimer);
-        promptSaveTimer = setTimeout(salvarPromptPainel, 2000);
+        promptSaveTimer = setTimeout(salvarPromptPainel, 450);
       }
     }
 
@@ -7261,10 +8103,15 @@
         const res = await fetch('/api/ia/prompt');
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.erro || res.status);
+        // Fonte de verdade = texto canônico (marcadores). HTML só é cache visual.
+        promptVersaoBase = data.versao || '';
         promptSetContent(data.prompt || '');
+        promptBindMarkupClipboard();
+        if (window.teaPromptEditorUx) teaPromptEditorUx.init();
         promptPushHistory(promptGetSerialized(), true);
         atualizarContagemPrompt();
         setPromptSaveBadge('ok', 'Salvo');
+        carregarFunilFixo();
       } catch (err) {
         el.textContent = '';
         el.dataset.placeholder = 'Erro ao carregar: ' + err.message;
@@ -7273,21 +8120,178 @@
     }
 
     async function salvarPromptPainel() {
+      if (window.teaPromptEditorUx && teaPromptEditorUx.estaOcupado && teaPromptEditorUx.estaOcupado()) {
+        promptSaveTimer = setTimeout(salvarPromptPainel, 120);
+        return;
+      }
       const texto = promptGetSerialized();
+      const html = promptMarkdownToHtml(texto);
       if (!texto.trim()) return;
       setPromptSaveBadge('pending', 'Salvando...');
       try {
         const res = await fetch('/api/ia/prompt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: texto }),
+          body: JSON.stringify({ prompt: texto, html, base_versao: promptVersaoBase || undefined }),
         });
         const data = await res.json();
+        if (res.status === 409 && data && data.conflito) {
+          tratarConflitoPrompt(data);
+          return;
+        }
+        if (res.status === 409 && data && data.encolhimento) {
+          await tratarEncolhimentoPrompt(data, texto, html);
+          return;
+        }
         if (!res.ok || !data.ok) throw new Error(data.erro || res.status);
+        promptVersaoBase = data.versao || promptVersaoBase;
         setPromptSaveBadge('ok', 'Salvo');
       } catch (err) {
         setPromptSaveBadge('err', 'Erro ao salvar');
         alert('Falha ao salvar prompt: ' + err.message);
+      }
+    }
+
+    // --- LÓGICA DO FUNIL FIXO ---
+    async function carregarFunilFixo() {
+      try {
+        const res = await fetch('/api/ia/funil-fixo');
+        const data = await res.json();
+        if (res.ok && data.ok && data.config) {
+          const c = data.config;
+          document.getElementById('funil-fixo-ativo').checked = c.ativo;
+          document.getElementById('funil-fixo-label').textContent = c.ativo ? 'Desativar' : 'Ativar';
+          document.getElementById('funil-fila-destino').value = c.fila_destino || 'comercial';
+
+          if (c.audio1_url) {
+            document.getElementById('funil-url-1').value = c.audio1_url;
+            document.getElementById('funil-status-1').textContent = 'Áudio carregado.';
+            const p = document.getElementById('funil-player-1');
+            p.src = c.audio1_url;
+            p.style.display = 'block';
+          }
+          if (c.audio2_url) {
+            document.getElementById('funil-url-2').value = c.audio2_url;
+            document.getElementById('funil-status-2').textContent = 'Áudio carregado.';
+            const p = document.getElementById('funil-player-2');
+            p.src = c.audio2_url;
+            p.style.display = 'block';
+          }
+        }
+      } catch(e) {
+        console.error('Erro ao carregar config funil', e);
+      }
+    }
+
+    async function salvarFunilFixo() {
+      const ativo = document.getElementById('funil-fixo-ativo').checked;
+      const a1 = document.getElementById('funil-url-1').value;
+      const a2 = document.getElementById('funil-url-2').value;
+      const filaDestino = document.getElementById('funil-fila-destino').value;
+
+      document.getElementById('funil-fixo-label').textContent = ativo ? 'Desativar' : 'Ativar';
+
+      try {
+        await fetch('/api/ia/funil-fixo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ativo, audio1_url: a1, audio2_url: a2, fila_destino: filaDestino })
+        });
+      } catch(e) {
+        console.error('Erro ao salvar funil', e);
+      }
+    }
+
+    async function uploadFunilAudio(passo, inputElem) {
+      const file = inputElem.files[0];
+      if (!file) return;
+      
+      const statusEl = document.getElementById('funil-status-' + passo);
+      statusEl.textContent = 'Enviando... aguarde';
+      
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Full = e.target.result;
+        const base64Data = base64Full.split(',')[1];
+        try {
+          const res = await fetch('/api/ia/funil-fixo/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nome: file.name,
+              base64: base64Data
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.publicUrl) {
+            document.getElementById('funil-url-' + passo).value = data.publicUrl;
+            statusEl.textContent = 'Enviado com sucesso!';
+            const p = document.getElementById('funil-player-' + passo);
+            p.src = data.publicUrl;
+            p.style.display = 'block';
+            salvarFunilFixo();
+          } else {
+            statusEl.textContent = 'Erro ao enviar: ' + (data.erro || 'Falha');
+          }
+        } catch(err) {
+          statusEl.textContent = 'Erro de conexão: ' + err.message;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /** Save que apagaria a maior parte do prompt só passa com "sim" explícito. */
+    async function tratarEncolhimentoPrompt(data, texto, html) {
+      const perdidos = (data.tamanho_atual || 0) - (data.tamanho_novo || 0);
+      setPromptSaveBadge('err', 'Não salvo');
+      const confirmou = confirm(
+        'Este salvamento apagaria ' +
+          perdidos +
+          ' caracteres do prompt (de ' +
+          data.tamanho_atual +
+          ' para ' +
+          data.tamanho_novo +
+          ').\n\n' +
+          'OK = salvar assim mesmo\n' +
+          'Cancelar = manter o prompt como está (recarrega a versão salva)',
+      );
+      if (!confirmou) {
+        carregarPromptPainel();
+        return;
+      }
+      setPromptSaveBadge('pending', 'Salvando...');
+      try {
+        const res = await fetch('/api/ia/prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: texto, html, permitir_encolher: true }),
+        });
+        const novo = await res.json();
+        if (!res.ok || !novo.ok) throw new Error(novo.erro || res.status);
+        promptVersaoBase = novo.versao || promptVersaoBase;
+        setPromptSaveBadge('ok', 'Salvo');
+      } catch (err) {
+        setPromptSaveBadge('err', 'Erro ao salvar');
+        alert('Falha ao salvar prompt: ' + err.message);
+      }
+    }
+
+    function tratarConflitoPrompt(data) {
+      clearTimeout(promptSaveTimer);
+      promptAutosave = false;
+      const track = document.getElementById('prompt-autosave-track');
+      if (track) track.classList.remove('on');
+      setPromptSaveBadge('err', 'Conflito — não salvo');
+      const querRecarregar = confirm(
+        'O prompt foi alterado em outro lugar depois que esta tela abriu.\n\n' +
+          'Para não apagar a versão nova, este salvamento foi cancelado e o autosave desligado.\n\n' +
+          'OK = carregar a versão atual (perde o que está na tela)\n' +
+          'Cancelar = manter o texto da tela para você copiar antes',
+      );
+      if (querRecarregar) {
+        promptAutosave = true;
+        if (track) track.classList.add('on');
+        carregarPromptPainel();
       }
     }
 
@@ -7595,6 +8599,11 @@
         .then(function (r) { return r.json(); })
         .then(function (d) {
           window.__UI_FLAGS__ = { calendario: !!(d && d.calendario) };
+          if (window.AbaRota && AbaRota.resolver() === 'calendario' && window.__UI_FLAGS__.calendario) {
+            switchView('calendario');
+          } else if (typeof restaurarAbaPersistida === 'function') {
+            restaurarAbaPersistida();
+          }
           var nav = document.getElementById('nav-calendario');
           if (nav) nav.style.display = window.__UI_FLAGS__.calendario ? '' : 'none';
           var viewCal = document.getElementById('view-calendario');
@@ -7602,7 +8611,7 @@
         })
         .catch(function () { /* calendário fica oculto */ });
     })();
-    iniciarPainelEventos();
+    iniciarPainelEventos(false);
     atualizarPainelPausas(false);
     carregarPausasAtivas();
     fetchNotificacao();
@@ -7613,20 +8622,92 @@
     const pausaTelInput = document.getElementById('pausa-telefone');
     if (pausaTelInput) {
       pausaTelInput.addEventListener('input', function () {
+        if (document.hidden) return;
         clearTimeout(window._syncRapidoDebounce);
         window._syncRapidoDebounce = setTimeout(syncTelefoneRapido, 150);
       });
     }
 
-    setInterval(syncTelefoneRapido, 200);
-
+    function iniciarTimersPainel() {
+      if (window._timerSyncTel) return;
+      window._timerSyncTel = setInterval(function(){ if (document.hidden) return; if (window._painelEsOk) return; syncTelefoneRapido(); }, 60000);
+      window._timerPausas = /* frota-veloz-pausa-20260811 */
     setInterval(function () {
+      if (document.hidden) return;
+      if (window._painelEsOk) return;
       atualizarPainelPausas(false);
-    }, 30000);
-
+    }, 60000);
     setInterval(function () {
-      carregarDashboardViz();
-    }, 300000);
+      if (document.hidden) return;
+      if (!window._painelEsOk) return;
+      atualizarPainelPausas(false);
+    }, 180000);
+      window._timerDash = setInterval(function () {
+        if (document.hidden) return;
+        carregarDashboardViz();
+      }, 300000);
+    }
+
+    function pausarTimersPainel() {
+      if (window._timerSyncTel) { clearInterval(window._timerSyncTel); window._timerSyncTel = null; }
+      if (window._timerPausas) { clearInterval(window._timerPausas); window._timerPausas = null; }
+      if (window._timerDash) { clearInterval(window._timerDash); window._timerDash = null; }
+      clearTimeout(window._syncRapidoDebounce);
+      clearTimeout(window._wakeStatusDebounce);
+    }
+
+    iniciarTimersPainel();
+
+    (function initWakeResumePainel() {
+      var HIDDEN_SOFT_RELOAD_MS = 8 * 60 * 1000;
+      window._painelHiddenAt = null;
+
+      function softResumePainel(origem) {
+        var hiddenMs = 0;
+        if (window._painelHiddenAt) {
+          hiddenMs = Date.now() - window._painelHiddenAt;
+          window._painelHiddenAt = null;
+        }
+        iniciarTimersPainel();
+        // Reconecta SSE só se caiu ou ausência longa (evita storm ao trocar de aba).
+        var es = window._painelEventSource;
+        var sseMorto = !es || es.readyState === 2;
+        if (sseMorto || hiddenMs > 60 * 1000) iniciarPainelEventos(true);
+        else if (!es || es.readyState !== 1) iniciarPainelEventos(false);
+        clearTimeout(window._wakeStatusDebounce);
+        window._wakeStatusDebounce = setTimeout(function () {
+          fetchInstanceStatus({ forcar: true });
+        }, 1500);
+        var frame = document.getElementById('chatwoot-frame');
+        var jaTemCw = frame
+          && frame.getAttribute('data-cw-ok') === '1'
+          && frame.getAttribute('src')
+          && frame.getAttribute('src') !== 'about:blank';
+        if (hiddenMs > HIDDEN_SOFT_RELOAD_MS && jaTemCw) {
+          console.info('[wake] soft-reload Chatwoot', { origem: origem || 'visibility', hiddenMs: hiddenMs });
+          carregarChatwootSso(true);
+        } else if (hiddenMs > 0) {
+          console.info('[wake] keep Chatwoot iframe', { origem: origem || 'visibility', hiddenMs: hiddenMs });
+        }
+      }
+
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+          window._painelHiddenAt = Date.now();
+          pausarTimersPainel();
+          return;
+        }
+        softResumePainel('visibilitychange');
+      });
+
+      window.addEventListener('pageshow', function (ev) {
+        if (document.hidden) return;
+        if (ev.persisted || window._painelHiddenAt) {
+          softResumePainel('pageshow');
+        }
+      });
+    })();
+
 
     /** Zoom +/- em todos os .modal-overlay do painel (scroll do overlay já ativo). */
     (function initModalZoomPainel() {
@@ -7664,5 +8745,8 @@
       });
     })();
   </script>
+  <script src="prompt-markup.js"></script>
+  <script src="prompt-editor-ux.js"></script>
+  <script src="midias-gatilho.js"></script>
 </body>
 </html>

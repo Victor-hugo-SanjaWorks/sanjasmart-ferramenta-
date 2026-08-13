@@ -107,6 +107,36 @@ export async function obterHistorico(telefone: string, limite = 20): Promise<Reg
   return mesclarHistorico(mensagens, proativas);
 }
 
+/** Apaga o historico de conversa do contato (variantes BR do mesmo WhatsApp). */
+export async function limparHistorico(telefone: string): Promise<void> {
+  const variantes = variantesTelefoneBr(telefone);
+  if (!variantes.length) return;
+  await pool.query(`DELETE FROM historico_conversa WHERE telefone = ANY($1)`, [variantes]);
+}
+
+/**
+ * Apaga o que a IA "lembra" deste WhatsApp: histórico + ficha.
+ * Retorna quantas linhas de histórico foram removidas.
+ */
+export async function apagarMemoriaIaContato(telefone: string): Promise<{ telefone: string; removidas: number }> {
+  const canon = canonizarTelefoneBr(telefone);
+  const variantes = variantesTelefoneBr(telefone);
+  if (!variantes.length || !telefoneEhContatoValido(canon)) {
+    throw new Error('Telefone inválido');
+  }
+  const res = await pool.query(
+    `DELETE FROM historico_conversa WHERE telefone = ANY($1)`,
+    [variantes],
+  );
+  try {
+    const { limparEstadoCliente } = await import('./estado-minasplaca.js');
+    await limparEstadoCliente(canon);
+  } catch {
+    /* ficha auxiliar — não bloqueia */
+  }
+  return { telefone: canon, removidas: res.rowCount ?? 0 };
+}
+
 export async function adicionarAoHistorico(
   telefone: string,
   mensagens: Array<{ role: 'user' | 'assistant' | 'atendente'; content: string; timestamp: number }>,

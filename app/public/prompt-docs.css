@@ -1,0 +1,252 @@
+/**
+ * Estilos do upload de documentos na area Prompt.
+ * Lista e dropzone sao modais — nao ocupam espaco no editor do prompt.
+ */
+.pte-btn-docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.pte-btn-docs svg { width: 16px; height: 16px; }
+
+.prompt-docs-lista-dialog,
+.prompt-docs-upload-dialog,
+.prompt-docs-preview-dialog {
+  width: min(560px, calc(100vw - 28px));
+  max-height: min(88vh, 640px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.prompt-docs-preview-dialog {
+  width: min(720px, calc(100vw - 28px));
+  max-height: min(90vh, 780px);
+}
+.prompt-docs-lista-dialog .pdu-head,
+.prompt-docs-upload-dialog .pdu-head,
+.prompt-docs-preview-dialog .pdu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 10px;
+  flex-shrink: 0;
+}
+.prompt-docs-lista-dialog .pdu-title,
+.prompt-docs-upload-dialog .pdu-title,
+.prompt-docs-preview-dialog .pdu-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--brand, #1668A6);
+}
+.prompt-docs-lista-dialog .pdu-body,
+.prompt-docs-upload-dialog .pdu-body,
+.prompt-docs-preview-dialog .pdu-body {
+  padding: 8px 18px 18px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.pdu-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid rgba(17, 18, 36, 0.08);
+  flex-shrink: 0;
+}
+
+.prompt-docs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.prompt-docs-hint {
+  font-size: 12px;
+  color: var(--muted, #5c6170);
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+.prompt-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(48vh, 360px);
+  overflow: auto;
+  min-height: 80px;
+}
+.prompt-docs-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(17, 18, 36, 0.08);
+}
+.prompt-docs-item .nome {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prompt-docs-item .meta {
+  font-size: 11px;
+  color: var(--muted, #5c6170);
+  white-space: nowrap;
+}
+.prompt-docs-item button {
+  border: 0;
+  background: transparent;
+  color: #a11;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.prompt-docs-item button.pdu-ver {
+  color: var(--brand, #1668A6);
+}
+/* Empilhamento: lista < upload < preview (abre por cima) */
+#modal-prompt-docs-lista { z-index: 1000; }
+#modal-prompt-docs-upload { z-index: 1010; }
+#modal-prompt-docs-preview { z-index: 1020; }
+.prompt-docs-preview-body {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #F4FBFD;
+  border: 1px solid rgba(14, 77, 126, 0.14);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #0B2A40;
+  max-height: min(62vh, 560px);
+  overflow: auto;
+}
+.prompt-docs-status {
+  font-size: 12px;
+  color: var(--muted, #5c6170);
+  min-height: 1.2em;
+  margin-top: 10px;
+}
+.prompt-docs-status.err { color: #b00020; }
+.prompt-docs-status.ok { color: #0a7a3e; }
+
+.prompt-docs-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 28px 20px;
+  border: 2px dashed rgba(22, 104, 166, 0.28);
+  border-radius: 16px;
+  background: rgba(219, 242, 247, 0.35);
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+.prompt-docs-dropzone.dragover {
+  border-color: var(--brand, #1668A6);
+  background: rgba(164, 228, 237, 0.45);
+}
+.prompt-docs-dropzone .pdu-illu {
+  width: 88px;
+  height: 72px;
+  color: var(--brand, #1668A6);
+  opacity: 0.9;
+}
+.prompt-docs-dropzone .pdu-illu svg { width: 100%; height: 100%; }
+.prompt-docs-dropzone .pdu-procurar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand, #1668A6);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.prompt-docs-dropzone .pdu-procurar:hover { filter: brightness(1.06); }
+.prompt-docs-dropzone .pdu-or {
+  font-size: 13px;
+  color: var(--muted, #5c6170);
+  max-width: 280px;
+  line-height: 1.45;
+}
+.prompt-docs-dropzone .pdu-or b { color: var(--brand, #1668A6); }
+.prompt-docs-dropzone .pdu-types {
+  font-size: 11px;
+  color: var(--muted, #5c6170);
+}
+.prompt-docs-queue {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow: auto;
+}
+.prompt-docs-queue:empty { display: none; }
+.prompt-docs-queue li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(17, 18, 36, 0.08);
+  font-size: 12px;
+}
+.prompt-docs-queue .q-nome {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prompt-docs-queue .q-st { white-space: nowrap; color: var(--muted, #5c6170); }
+.prompt-docs-queue .q-st.ok { color: #0a7a3e; }
+.prompt-docs-queue .q-st.err { color: #b00020; }
+.prompt-docs-queue .q-st.run { color: var(--brand, #1668A6); }
+.pdu-modal-status {
+  font-size: 12px;
+  min-height: 1.2em;
+  margin-top: 10px;
+  color: var(--muted, #5c6170);
+}
+.pdu-modal-status.ok { color: #0a7a3e; }
+.pdu-modal-status.err { color: #b00020; }
+
+body.tema-glass .prompt-docs-item,
+body.tema-glass .prompt-docs-queue li {
+  background: #F4FBFD;
+  border-color: rgba(14, 77, 126, 0.14);
+}
+body.tema-glass .prompt-docs-item .nome { color: #0B2A40; }
+body.tema-glass .prompt-docs-hint,
+body.tema-glass .prompt-docs-item .meta,
+body.tema-glass .prompt-docs-status { color: #5A6B7A; }
+body.tema-glass .prompt-docs-dropzone {
+  background: rgba(244, 251, 253, 0.9);
+  border-color: rgba(22, 104, 166, 0.32);
+}
+body.tema-glass .prompt-docs-item button { color: #1668A6; }

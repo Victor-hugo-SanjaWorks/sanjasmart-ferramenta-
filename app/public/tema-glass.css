@@ -1,0 +1,300 @@
+/**
+ * Tema glassmorfismo real (estilo iOS Control Center) para a area interna.
+ * POR QUE existe: sem isto o app fica branco chapado. Vidro so "aparece" sobre
+ * fundo VIBRANTE e com CONTRASTE — por isso ha orbs coloridos animados atras dos
+ * cards, e os cards sao translucidos + blur forte para a cor vazar (frosted real).
+ * Ativado por body.tema-glass; usa especificidade de ID p/ vencer o CSS branco.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+body.tema-glass {
+  --accent: #3b6bff;
+  --accent2: #8a5cff;
+  --ink: #101430;
+  --ink-soft: #444b73;
+  /* Vidro: baixa opacidade p/ a cor do fundo vazar; blur+saturate = frosted. */
+  --glass-filter: blur(30px) saturate(210%);
+  --glass-filter-sm: blur(16px) saturate(190%);
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-bg-soft: rgba(255, 255, 255, 0.22);
+  --glass-bg-strong: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  /* Brilho diagonal por cima do frosted (aresta iluminada). */
+  --glass-sheen: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.06) 46%);
+  /* Rim light: 1px claro no topo-esq., sombra sutil na base-dir. */
+  --rim:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.9),
+    inset -1px -1px 0 rgba(60, 70, 130, 0.12);
+  /* Sombra difusa, espacada, opacidade baixa (card flutuando). */
+  --glass-shadow: 0 26px 60px rgba(20, 26, 70, 0.16);
+  --raio-card: 22px;
+  --raio-inner: 15px;
+  --raio-pill: 999px;
+  font-family: Manrope, system-ui, sans-serif;
+  color: var(--ink);
+  background: #0f1642;
+}
+
+/* ---- Fundo vibrante: mesh saturado + orbs coloridos animados atras de tudo.
+   E o contraste desses orbs desfocados que faz o vidro "aparecer". ---- */
+body.tema-glass .app-shell {
+  background:
+    radial-gradient(1100px 780px at 8% -6%, #6fb0ff 0%, transparent 48%),
+    radial-gradient(1000px 720px at 100% 4%, #7b5bff 0%, transparent 46%),
+    radial-gradient(1100px 900px at 92% 100%, #ff5fae 0%, transparent 46%),
+    radial-gradient(900px 780px at -4% 100%, #26e0c8 0%, transparent 46%),
+    linear-gradient(150deg, #2a3ea8 0%, #5a3bd0 52%, #b93a9a 100%);
+  background-attachment: fixed;
+  overflow: hidden;
+}
+/* Orbs saturados que flutuam devagar (movimento = vida, do material). */
+body.tema-glass .app-shell::before {
+  content: '';
+  position: fixed;
+  inset: -20% -10%;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background:
+    radial-gradient(340px 340px at 20% 30%, rgba(90, 180, 255, 0.9) 0%, transparent 62%),
+    radial-gradient(380px 380px at 78% 22%, rgba(150, 90, 255, 0.85) 0%, transparent 62%),
+    radial-gradient(420px 420px at 68% 84%, rgba(255, 90, 170, 0.8) 0%, transparent 62%),
+    radial-gradient(360px 360px at 26% 82%, rgba(40, 220, 200, 0.75) 0%, transparent 62%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+  animation: glassOrbs 26s ease-in-out infinite alternate;
+}
+@keyframes glassOrbs {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(3%, -2%, 0) scale(1.08); }
+  100% { transform: translate3d(-3%, 3%, 0) scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.tema-glass .app-shell::before { animation: none; }
+}
+
+/* Fundo por FOTO: foto MUITO desfocada + overlay escuro (legibilidade, pilar 5). */
+body.tema-glass.tem-fundo .app-shell { background: #0e1230; }
+body.tema-glass.tem-fundo .app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  transform: scale(1.06);
+  filter: blur(7px);
+  animation: none;
+  background:
+    linear-gradient(150deg, rgba(12, 16, 38, 0.6), rgba(12, 16, 38, 0.72)),
+    var(--app-bg-url, none) center / cover no-repeat;
+}
+body.tema-glass.tem-fundo {
+  --glass-bg: rgba(255, 255, 255, 0.93);
+  --glass-bg-soft: rgba(255, 255, 255, 0.85);
+  --ink: #12162b;
+  --ink-soft: #3a4166;
+}
+
+/* Camadas ATE o card precisam ser transparentes p/ o mesh/orbs aparecerem. */
+body.tema-glass .main-content { background: transparent !important; }
+body.tema-glass .dash-canvas {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.tema-glass #view-assistente,
+body.tema-glass .view { background: transparent !important; }
+
+/* ---- Paineis de vidro ----
+   O dashboard do assistente usa .ops-panel (nao .card); outras views usam .card.
+   Miramos os dois para o glass valer em toda a app. */
+body.tema-glass .sidebar-inner,
+body.tema-glass #view-assistente .ops-panel,
+body.tema-glass #view-assistente .card,
+body.tema-glass #view-prompt .card,
+body.tema-glass .card,
+body.tema-glass .card-glass,
+body.tema-glass .modal,
+body.tema-glass .senha-modal-wrap,
+body.tema-glass .ai-magic-dialog {
+  background: var(--glass-sheen), var(--glass-bg) !important;
+  backdrop-filter: var(--glass-filter) !important;
+  -webkit-backdrop-filter: var(--glass-filter) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--rim), var(--glass-shadow) !important;
+  border-radius: var(--raio-card) !important;
+  color: var(--ink) !important;
+}
+body.tema-glass #view-assistente .ops-panel:hover,
+body.tema-glass #view-assistente .card:hover {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: var(--rim), 0 32px 72px rgba(20, 26, 70, 0.22) !important;
+  transform: translateY(-2px) !important;
+  transition: transform .2s, box-shadow .2s;
+}
+
+body.tema-glass .sidebar-inner {
+  background: var(--glass-sheen), rgba(255, 255, 255, 0.42) !important;
+}
+
+/* Cabecalho e corpo dos paineis ops ficam translucidos (sem branco solido). */
+body.tema-glass #view-assistente .ops-panel-head,
+body.tema-glass #view-assistente .ops-panel-body,
+body.tema-glass #view-assistente .card-header,
+body.tema-glass #view-assistente .card-shell,
+body.tema-glass .card-header {
+  background: transparent !important;
+  border-bottom-color: rgba(60, 70, 130, 0.2) !important;
+}
+body.tema-glass #view-assistente .card-icon {
+  background: rgba(255, 255, 255, 0.55) !important;
+  color: var(--accent) !important;
+  box-shadow: var(--rim);
+}
+/* Tiles internos (ops-meta, meta-card) — vidro mais suave, sem re-blur pesado. */
+body.tema-glass #view-assistente .ops-meta > div,
+body.tema-glass #view-assistente .meta-card,
+body.tema-glass .meta-card {
+  background: rgba(255, 255, 255, 0.34) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-inner) !important;
+  box-shadow: var(--rim) !important;
+  color: var(--ink) !important;
+}
+/* Chip de status e banner de aviso em vidro. */
+body.tema-glass #view-assistente .ops-chip {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-pill) !important;
+  box-shadow: var(--rim) !important;
+  color: var(--ink) !important;
+}
+body.tema-glass #view-assistente .ops-banner {
+  background: rgba(255, 235, 235, 0.5) !important;
+  backdrop-filter: var(--glass-filter-sm) !important;
+  -webkit-backdrop-filter: var(--glass-filter-sm) !important;
+  border: 1px solid rgba(255, 150, 150, 0.5) !important;
+  border-radius: var(--raio-inner) !important;
+  color: #7f1020 !important;
+}
+/* Campos/inputs wrapper. */
+body.tema-glass #view-assistente .field { background: transparent !important; }
+
+/* Textos solidos (contraste — nunca blur/opacidade no texto). */
+body.tema-glass .dash-title,
+body.tema-glass #view-assistente .dash-title,
+body.tema-glass #view-assistente .card-title,
+body.tema-glass .sidebar-brand-text,
+body.tema-glass .card-title,
+body.tema-glass .ops-title,
+body.tema-glass h1, body.tema-glass h2, body.tema-glass h3,
+body.tema-glass strong { color: var(--ink) !important; }
+body.tema-glass .dash-sub,
+body.tema-glass #view-assistente .dash-sub,
+body.tema-glass #view-assistente .card-subtitle,
+body.tema-glass .sidebar-brand-sub,
+body.tema-glass .meta, body.tema-glass .hint,
+body.tema-glass label, body.tema-glass p { color: var(--ink-soft) !important; }
+body.tema-glass #view-assistente .dash-header {
+  border-bottom-color: rgba(60, 70, 130, 0.24) !important;
+}
+
+/* ---- Navegacao: capsulas estilo tab bar ---- */
+body.tema-glass .nav-item {
+  color: var(--ink-soft);
+  border-radius: var(--raio-pill);
+  transition: background .18s, color .18s, box-shadow .18s;
+}
+body.tema-glass .nav-item:hover { background: rgba(255, 255, 255, 0.45); color: var(--accent); }
+body.tema-glass .nav-item.active {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--accent);
+  box-shadow: var(--rim), 0 8px 20px rgba(30, 40, 120, 0.2);
+}
+body.tema-glass .nav-item.active .nav-icon { color: var(--accent2); }
+
+/* ---- Botoes: primario solido + secundario frosted ---- */
+body.tema-glass .dash-btn-qr,
+body.tema-glass .mini.primario,
+body.tema-glass .entrar,
+body.tema-glass .pte-btn-magic {
+  background: linear-gradient(180deg, #5a86ff, #3b6bff) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--raio-pill) !important;
+  box-shadow: var(--rim), 0 12px 26px rgba(59, 107, 255, 0.42) !important;
+}
+body.tema-glass .dash-btn-qr:hover,
+body.tema-glass .mini.primario:hover { filter: brightness(1.06); }
+
+body.tema-glass .mini,
+body.tema-glass .pte-btn,
+body.tema-glass button.senha-btn-ghost,
+body.tema-glass .senha-btn-alt {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: var(--glass-filter-sm);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-pill) !important;
+  box-shadow: var(--rim);
+  color: var(--ink) !important;
+}
+
+/* Pills de status / chips — tiles do Control Center. */
+body.tema-glass .dash-pill,
+body.tema-glass .ops-chip {
+  background: rgba(255, 255, 255, 0.48) !important;
+  backdrop-filter: var(--glass-filter-sm);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-pill) !important;
+  color: var(--ink) !important;
+  box-shadow: var(--rim);
+}
+
+/* Inputs e editor de prompt. */
+body.tema-glass #prompt-editor,
+body.tema-glass input[type=text],
+body.tema-glass input[type=email],
+body.tema-glass input[type=password],
+body.tema-glass input[type=number],
+body.tema-glass textarea,
+body.tema-glass select {
+  background: rgba(255, 255, 255, 0.62) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-inner) !important;
+}
+body.tema-glass .pte-toolbar {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: var(--glass-filter-sm);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  border-color: var(--glass-border) !important;
+  border-radius: var(--raio-pill) !important;
+  box-shadow: var(--rim);
+}
+body.tema-glass .pte-btn { color: var(--ink); }
+
+/* Hero banner sobre o mesh. */
+body.tema-glass #app-hero {
+  min-height: 260px;
+  margin: 16px 16px 4px;
+  width: auto;
+  border-radius: var(--raio-card);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--rim), 0 28px 64px rgba(20, 26, 70, 0.3);
+}
+
+body.tema-glass .sidebar-user,
+body.tema-glass .sidebar-logout { border-radius: var(--raio-pill) !important; }
+
+/* Fallback sem backdrop-filter: versao opaca legivel. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body.tema-glass .sidebar-inner,
+  body.tema-glass #view-assistente .card,
+  body.tema-glass .card,
+  body.tema-glass .dash-pill,
+  body.tema-glass .mini,
+  body.tema-glass .pte-btn { background: var(--glass-bg-strong) !important; }
+}

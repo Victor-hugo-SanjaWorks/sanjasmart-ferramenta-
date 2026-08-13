@@ -1,0 +1,144 @@
+/**
+ * Refinos do tema glass para o dashboard do Assistente (ops-console).
+ * POR QUE existe: o tema-glass.css principal chegou perto de 300 linhas; aqui
+ * ficam os ajustes de CONTRASTE dos textos secundarios e o vidro dos controles
+ * que ainda vinham "chapados" (select de periodo, toggles, listas, badges).
+ * So vale sob body.tema-glass; usa #view-assistente p/ vencer o CSS branco base.
+ */
+
+/* ---- Contraste: textos secundarios em slate escuro (nao mais cinza claro) ---- */
+body.tema-glass #view-assistente .ops-panel-sub,
+body.tema-glass #view-assistente .ops-section-label,
+body.tema-glass #view-assistente .ops-switch-hint,
+body.tema-glass #view-assistente .ops-meta dt,
+body.tema-glass #view-assistente .meta-label,
+body.tema-glass #view-assistente .hint,
+body.tema-glass #view-assistente .hint-inline,
+body.tema-glass #view-assistente .conversas-lote-toolbar .hint-inline {
+  color: #333a5c !important;
+}
+body.tema-glass #view-assistente .ops-panel-title,
+body.tema-glass #view-assistente .ops-switch-state,
+body.tema-glass #view-assistente .ops-meta dd,
+body.tema-glass #view-assistente .ops-wa-state {
+  color: #0d1030 !important;
+}
+
+/* Estado vazio das listas: legivel e com borda de vidro. */
+body.tema-glass #view-assistente .logs-empty {
+  color: #333a5c !important;
+  border-color: rgba(60, 70, 130, 0.28) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-radius: 12px !important;
+}
+
+/* ---- Select de periodo: capsula de vidro (estava branco chapado) ---- */
+body.tema-glass #view-assistente .chart-period-select {
+  background: rgba(255, 255, 255, 0.85) !important;
+  -webkit-backdrop-filter: var(--glass-filter-sm) !important;
+  backdrop-filter: var(--glass-filter-sm) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--raio-pill) !important;
+  box-shadow: var(--rim) !important;
+  color: var(--ink) !important;
+}
+
+/* ---- Toggle: trilho translucido no OFF; verde solido no ON (contraste) ---- */
+body.tema-glass #view-assistente .ops-switch-track {
+  background: rgba(120, 130, 190, 0.35) !important;
+  box-shadow: var(--rim) !important;
+}
+body.tema-glass #view-assistente .ops-switch-thumb {
+  background: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 26, 70, 0.3) !important;
+}
+
+/* ---- Tiles internos de status (por telefone / conversas em lote) ---- */
+body.tema-glass #view-assistente .pausa-status.ativa {
+  background: rgba(209, 247, 209, 0.6) !important;
+  color: #12621f !important;
+}
+body.tema-glass #view-assistente .pausa-status.pausada {
+  background: rgba(255, 224, 224, 0.6) !important;
+  color: #8f1414 !important;
+}
+
+/* Rotulos internos das listas de conversa ficam legiveis. */
+body.tema-glass #view-assistente .pausas-lista .tag,
+body.tema-glass #view-assistente .conversas-lote-toolbar .check-round-text {
+  color: var(--ink) !important;
+}
+
+/* ============================================================
+   Legibilidade sobre a FOTO de fundo (.tem-fundo) + contraste dos botoes.
+   Regras separadas: parte so vale com foto atras (.tem-fundo); a parte de
+   botoes/banner vale em qualquer fundo glass. Recomendacoes de contraste.
+   ============================================================ */
+
+/* Cabecalho fica SOBRE a foto (sem card): texto branco com sombra p/ ler em
+   qualquer trecho claro/escuro da imagem (era cinza/escuro ilegivel). */
+body.tema-glass.tem-fundo #view-assistente #dash-greeting,
+body.tema-glass.tem-fundo #view-assistente .dash-title {
+  color: #ffffff !important;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55) !important;
+}
+body.tema-glass.tem-fundo #view-assistente #dash-sub {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Chips de status do topo (WhatsApp / IA) quase solidos p/ ler sobre a foto. */
+body.tema-glass.tem-fundo #view-assistente .ops-chip {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #12162b !important;
+}
+
+/* Barra lateral quase solida (estava translucida = "pontos cegos"). */
+body.tema-glass.tem-fundo .sidebar-inner {
+  background: rgba(255, 255, 255, 0.93) !important;
+}
+
+/* ---- Botoes de acao com contraste forte (verde/vermelho solidos) ---- */
+body.tema-glass #view-assistente button.success:not(:disabled) {
+  background: #0f9d5b !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+body.tema-glass #view-assistente button.danger {
+  background: #d92d2d !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+/* Secundarios (Sincronizar/Historico): fundo claro + texto ESCURO (era cinza). */
+body.tema-glass #view-assistente button.secondary {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #1d2340 !important;
+  border: 1px solid rgba(60, 70, 130, 0.28) !important;
+}
+
+/* ---- Banner de alerta (WhatsApp desconectado) salta aos olhos ---- */
+body.tema-glass #view-assistente .ops-banner {
+  background: rgba(254, 226, 226, 0.96) !important;
+  border: 1px solid #e07a7a !important;
+  color: #9f1239 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ---- Card do WhatsApp ganha destaque (1a acao a fazer: conectar) ---- */
+body.tema-glass #view-assistente #card-instance {
+  border: 1px solid rgba(255, 176, 32, 0.85) !important;
+  box-shadow:
+    var(--rim),
+    0 0 0 1px rgba(255, 176, 32, 0.35),
+    0 26px 60px rgba(20, 26, 70, 0.2) !important;
+}
+
+/* ---- "Por telefone": mais respiro entre campo e botoes ---- */
+body.tema-glass #view-assistente .ops-inline-form {
+  gap: 16px !important;
+  margin-bottom: 14px !important;
+}
+body.tema-glass #view-assistente .ops-inline-actions {
+  gap: 10px !important;
+}

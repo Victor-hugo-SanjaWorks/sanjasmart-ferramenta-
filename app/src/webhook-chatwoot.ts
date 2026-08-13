@@ -36,7 +36,16 @@ import {
 import { obterConfigFollowup, salvarConfigFollowup } from './followup-config.js';
 import { publicarEventoPainel } from './painel-eventos.js';
 import { obterConfigDelay, salvarConfigDelay } from './delay-config.js';
-import { obterPromptBruto, salvarPrompt } from './prompt-minasplaca.js';
+import {
+  obterPromptBruto,
+  obterPromptCompleto,
+  salvarPromptHtmlETexto,
+  promptHash,
+  ConflitoPromptError,
+  EncolhimentoPromptError,
+  listarVersoesPrompt,
+  obterVersaoPrompt,
+} from './prompt-minasplaca.js';
 import {
   aprovarPatch,
   criarPatchPrompt,
@@ -577,21 +586,84 @@ export async function rotasWebhookChatwoot(app: FastifyInstance): Promise<void> 
   // -------------------------------------------------------------------------
 
   app.get('/api/ia/prompt', async () => {
-    const prompt = await obterPromptBruto();
-    return { ok: true, prompt, tamanho: prompt.length };
+    const { texto, html } = await obterPromptCompleto();
+    return {
+      ok: true,
+      prompt: texto,
+      html,
+      tamanho: texto.length,
+      versao: promptHash(texto),
+    };
   });
 
   app.post('/api/ia/prompt', async (req, reply) => {
     const body = (req.body ?? {}) as Record<string, unknown>;
-    if (typeof body.prompt !== 'string') {
-      return reply.status(400).send({ ok: false, erro: 'Campo prompt é obrigatório.' });
+    const promptRaw = typeof body.prompt === 'string' ? body.prompt : '';
+    const htmlRaw = typeof body.html === 'string' ? body.html : undefined;
+    const baseVersao = typeof body.base_versao === 'string' ? body.base_versao : undefined;
+    if (!promptRaw.trim() && !htmlRaw?.trim()) {
+      return reply.status(400).send({ ok: false, erro: 'Campo prompt ou html é obrigatório.' });
     }
-    const prompt = body.prompt.trim();
-    if (!prompt) {
-      return reply.status(400).send({ ok: false, erro: 'O prompt não pode ficar vazio.' });
+    try {
+      const salvo = await salvarPromptHtmlETexto({
+        texto: promptRaw.trim() || undefined,
+        html: htmlRaw,
+        baseVersao,
+        permitirEncolher: body.permitir_encolher === true,
+      });
+      return {
+        ok: true,
+        tamanho: salvo.texto.length,
+        versao: salvo.versao,
+        salvo_em: new Date().toISOString(),
+      };
+    } catch (e) {
+      if (e instanceof ConflitoPromptError) {
+        return reply.status(409).send({
+          ok: false,
+          conflito: true,
+          erro: e.message,
+          versao: e.versaoAtual,
+          prompt: e.textoAtual,
+        });
+      }
+      if (e instanceof EncolhimentoPromptError) {
+        return reply.status(409).send({
+          ok: false,
+          encolhimento: true,
+          erro: e.message,
+          tamanho_atual: e.tamanhoAtual,
+          tamanho_novo: e.tamanhoNovo,
+          prompt: e.textoAtual,
+        });
+      }
+      return reply.status(400).send({
+        ok: false,
+        erro: e instanceof Error ? e.message : String(e),
+      });
     }
-    await salvarPrompt(prompt);
-    return { ok: true, tamanho: prompt.length, salvo_em: new Date().toISOString() };
+  });
+
+  app.get('/api/ia/prompt/versoes', async () => {
+    const itens = await listarVersoesPrompt(40);
+    return { ok: true, itens };
+  });
+
+  app.post('/api/ia/prompt/restaurar', async (req, reply) => {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const id = Number(body.id);
+    if (!Number.isFinite(id)) {
+      return reply.status(400).send({ ok: false, erro: 'id da versão é obrigatório.' });
+    }
+    const versao = await obterVersaoPrompt(id);
+    if (!versao) return reply.status(404).send({ ok: false, erro: 'Versão não encontrada.' });
+    const salvo = await salvarPromptHtmlETexto({
+      texto: versao.texto,
+      html: versao.html || undefined,
+      permitirEncolher: true,
+      origem: 'restauracao',
+    });
+    return { ok: true, tamanho: salvo.texto.length, versao: salvo.versao, prompt: salvo.texto };
   });
 
   // -------------------------------------------------------------------------

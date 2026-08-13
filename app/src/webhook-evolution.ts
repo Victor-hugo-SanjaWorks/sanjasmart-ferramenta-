@@ -3,7 +3,7 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { config } from './config.js';
-import { adicionarAoDebounce } from './debounce-minasplaca.js';
+import { adicionarAoDebounce, tentarComandoRecomecarAtendimento } from './debounce-minasplaca.js';
 import { iaEstaPausada } from './pausa-minasplaca.js';
 import { linhaTemLicencaIa } from './licenca-ia.js';
 import { jidParaTelefone } from './util/telefone.js';
@@ -282,7 +282,7 @@ export async function rotasWebhook(app: FastifyInstance): Promise<void> {
         }
         const telefone = jidParaTelefone(remoteJid);
         const instance = payload.instance ?? config.evolutionInstance;
-        if (!(await linhaTemLicencaIa(instance))) {
+    if (!(await linhaTemLicencaIa(instance))) {
           return reply.status(200).send({ ok: true, ignorado: 'fromMe_sem_licenca' });
         }
         const message = dados.message ?? {};
@@ -313,12 +313,24 @@ export async function rotasWebhook(app: FastifyInstance): Promise<void> {
     const telefone = jidParaTelefone(remoteJid);
     const instance = payload.instance ?? config.evolutionInstance;
 
+    
+
+    
+
+    const message = dados.message ?? {};
+
+    // Comando de sistema (texto puro): bypass licença/pausa antes de mídia/STT.
+    const textoComando = extrairTexto(message).trim();
+    if (textoComando && (await tentarComandoRecomecarAtendimento(telefone, textoComando, 'evolution'))) {
+      return reply.status(200).send({ ok: true, comando: 'recomecar-atendimento' });
+    }
+
     if (!(await linhaTemLicencaIa(instance))) {
       console.log(`[webhook] sem licenca IA na linha ${instance} — ignorado`);
       return reply.status(200).send({ ok: true, ignorado: 'sem_licenca_ia', instance });
     }
 
-    const message = dados.message ?? {};
+    
     
     // Log do payload completo para debug de estrutura do Evolution API
     console.log(`[webhook] DEBUG dados recebidos para ${telefone}:`, JSON.stringify(dados, null, 2));

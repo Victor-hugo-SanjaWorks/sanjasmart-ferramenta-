@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { config } from './config.js';
-import { obterPromptBruto, salvarPrompt } from './prompt-minasplaca.js';
+import { obterPromptCompleto, salvarPrompt } from './prompt-minasplaca.js';
+import { listarSecoesMarkup, temMarcadoresSecao } from './prompt-markup.js';
 
 const pool = new pg.Pool({ connectionString: config.databaseUrl });
 const BLOCO_LIVRE = 'PROMPT LIVRE';
@@ -43,6 +44,10 @@ export interface PatchTreinadorRegistro {
 export interface PromptBloco {
   nome: string;
   texto: string;
+  caminho?: string;
+  nivel?: number;
+  linhaAbertura?: number;
+  linhaFim?: number;
 }
 
 export interface PatchTreinadorSimulado {
@@ -81,6 +86,21 @@ export async function inicializarModoTreinador(): Promise<void> {
 }
 
 export function quebrarPromptEmBlocos(prompt: string): PromptBloco[] {
+  if (temMarcadoresSecao(prompt)) {
+    const secoes = listarSecoesMarkup(prompt);
+    if (secoes.length) {
+      return secoes.map((s) => ({
+        nome: s.titulo,
+        texto: s.corpo,
+        caminho: s.caminho,
+        nivel: s.nivel,
+        linhaAbertura: s.linhaAbertura,
+        linhaFim: s.linhaFim,
+      }));
+    }
+  }
+
+  // Compatibilidade com prompts antigos.
   const linhas = prompt.split(/\r?\n/);
   const blocos: PromptBloco[] = [];
   let atual: PromptBloco | null = null;
@@ -165,7 +185,28 @@ function detectarModoAlvo(entrada: PatchTreinadorEntrada): ModoAlvoTreinador {
 }
 
 function localizarBloco(blocos: PromptBloco[], nome: string): PromptBloco | null {
-  return blocos.find((b) => b.nome.toLowerCase() === nome.toLowerCase()) || null;
+  const chave = nome.trim().toLocaleLowerCase('pt-BR');
+  return (
+    blocos.find((b) => b.caminho?.toLocaleLowerCase('pt-BR') === chave) ||
+    blocos.find((b) => b.nome.toLocaleLowerCase('pt-BR') === chave) ||
+    null
+  );
+}
+
+function substituirCorpoSecao(
+  prompt: string,
+  alvo: PromptBloco,
+  corpoNovo: string,
+): string {
+  if (alvo.linhaAbertura == null || alvo.linhaFim == null) {
+    throw new Error(`Seção "${alvo.nome}" não possui limites válidos.`);
+  }
+  const linhas = prompt.split(/\r?\n/);
+  return [
+    ...linhas.slice(0, alvo.linhaAbertura + 1),
+    ...corpoNovo.split('\n'),
+    ...linhas.slice(alvo.linhaFim),
+  ].join('\n');
 }
 
 function localizarJanelaLivre(texto: string, destaque: string): string {
@@ -211,7 +252,8 @@ export async function criarPatchPrompt(entrada: PatchTreinadorEntrada): Promise<
 }
 
 export async function simularPatchPrompt(entrada: PatchTreinadorEntrada): Promise<PatchTreinadorSimulado> {
-  const promptAtual = await obterPromptBruto();
+  // O treinador edita a fonte canônica, não a versão ## entregue à LLM.
+  const promptAtual = (await obterPromptCompleto()).texto;
   const modoAlvo = detectarModoAlvo(entrada);
 
   if (modoAlvo === 'livre') {
@@ -248,10 +290,15 @@ export async function simularPatchPrompt(entrada: PatchTreinadorEntrada): Promis
   if (!alvo) {
     throw new Error(`Bloco "${entrada.bloco}" não encontrado no prompt atual.`);
   }
-  const blocosNovos = blocos.map((b) => ({ ...b }));
-  const idx = blocosNovos.findIndex((b) => b.nome.toLowerCase() === alvoNome.toLowerCase());
-  blocosNovos[idx] = { ...blocosNovos[idx], texto: aplicarPatchTexto(blocosNovos[idx].texto, entrada) };
-  const promptNovo = montarPromptDeBlocos(blocosNovos);
+  const textoNovo = aplicarPatchTexto(alvo.texto, entrada);
+  const promptNovo =
+    alvo.linhaAbertura != null
+      ? substituirCorpoSecao(promptAtual, alvo, textoNovo)
+      : montarPromptDeBlocos(
+          blocos.map((b) =>
+            b === alvo ? { ...b, texto: textoNovo } : { ...b },
+          ),
+        );
   return {
     bloco: entrada.bloco,
     modo_alvo: 'bloco',
@@ -262,12 +309,12 @@ export async function simularPatchPrompt(entrada: PatchTreinadorEntrada): Promis
     prompt_antes: promptAtual,
     prompt_depois: promptNovo,
     preview_antes: alvo.texto,
-    preview_depois: blocosNovos[idx].texto,
+    preview_depois: textoNovo,
   };
 }
 
 export async function listarBlocosPromptAtual(): Promise<PromptBloco[]> {
-  const promptAtual = await obterPromptBruto();
+  const promptAtual = (await obterPromptCompleto()).texto;
   return quebrarPromptEmBlocos(promptAtual);
 }
 

@@ -3,7 +3,7 @@
  * Eventos "messages"; ignora fromMe; dedupe por messageid.
  */
 import type { FastifyInstance } from 'fastify';
-import { adicionarAoDebounce } from './debounce-minasplaca.js';
+import { adicionarAoDebounce, tentarComandoRecomecarAtendimento } from './debounce-minasplaca.js';
 import { iaEstaPausada } from './pausa-minasplaca.js';
 import { linhaTemLicencaIa } from './licenca-ia.js';
 import { jidParaTelefone } from './util/telefone.js';
@@ -51,15 +51,20 @@ export async function rotasWebhookUazapi(app: FastifyInstance): Promise<void> {
     if (!telefone) return reply.status(200).send({ ok: true, ignorado: 'sem_telefone' });
 
     const instance = 'atendimento';
+    const conteudo = String(msg.text ?? '').trim();
+    if (!conteudo) return reply.status(200).send({ ok: true, ignorado: 'sem_conteudo' });
+
+    // Comando de sistema: bypass pausa/licença (não é turno de cliente).
+    if (await tentarComandoRecomecarAtendimento(telefone, conteudo, 'uazapi')) {
+      return reply.status(200).send({ ok: true, comando: 'recomecar-atendimento' });
+    }
+
     if (!(await linhaTemLicencaIa(instance))) {
       return reply.status(200).send({ ok: true, ignorado: 'sem_licenca_ia', instance });
     }
     if (await iaEstaPausada(telefone)) {
       return reply.status(200).send({ ok: true, ignorado: 'ia_pausada', telefone });
     }
-
-    const conteudo = String(msg.text ?? '').trim();
-    if (!conteudo) return reply.status(200).send({ ok: true, ignorado: 'sem_conteudo' });
 
     await adicionarAoDebounce({
       remoteJid: remoteJid || `${telefone}@s.whatsapp.net`,

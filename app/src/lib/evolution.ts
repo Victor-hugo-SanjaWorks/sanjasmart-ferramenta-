@@ -9,20 +9,28 @@ function aguardar(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function obterStatusConexao(instance: string): Promise<{ conectado: boolean; state?: string }> {
+export async function obterStatusConexao(instance: string): Promise<{
+  conectado: boolean;
+  state?: string;
+  /** Rede/timeout — nao confundir com WhatsApp desconectado de verdade. */
+  unknown?: boolean;
+}> {
   try {
     const res = await fetch(`${config.evolutionUrl}/instance/connectionState/${instance}`, {
       headers: { apikey: config.evolutionApiKey },
+      signal: AbortSignal.timeout(12_000),
     });
-    if (!res.ok) return { conectado: false };
+    if (!res.ok) return { conectado: false, state: 'unknown', unknown: true };
     const data = await res.json() as { state?: string; instance?: { state?: string } };
     const state = String(data.instance?.state ?? data.state ?? '').toLowerCase();
-    return { conectado: state === 'open' || state === 'connected', state };
+    return {
+      conectado: state === 'open' || state === 'connected',
+      state: state || 'unknown',
+    };
   } catch {
-    return { conectado: false };
+    return { conectado: false, state: 'unknown', unknown: true };
   }
 }
-
 export interface InfoChatwootEvolution {
   enabled: boolean;
   accountId: string | null;
@@ -34,6 +42,8 @@ export interface InfoInstanciaWhatsapp {
   instanceName: string;
   connected: boolean;
   state: string;
+  /** true = falha de rede/timeout (nao e "Desconectado"). */
+  unknown?: boolean;
   telefone: string | null;
   profileName: string | null;
   profilePicUrl: string | null;
@@ -81,6 +91,20 @@ async function buscarInstanciaEvolution(instance: string): Promise<InstanciaEvol
 
 export async function obterInfoInstancia(instance = config.evolutionInstance): Promise<InfoInstanciaWhatsapp> {
   const status = await obterStatusConexao(instance);
+  if (status.unknown) {
+    return {
+      instanceName: instance,
+      connected: false,
+      state: 'unknown',
+      unknown: true,
+      telefone: null,
+      profileName: null,
+      profilePicUrl: null,
+      integration: null,
+      chatwoot: null,
+      atualizadoEm: null,
+    };
+  }
   const inst = await buscarInstanciaEvolution(instance).catch(() => null);
   const state = String(inst?.connectionStatus ?? status.state ?? 'unknown').toLowerCase();
   const connected = status.conectado || state === 'open' || state === 'connected';

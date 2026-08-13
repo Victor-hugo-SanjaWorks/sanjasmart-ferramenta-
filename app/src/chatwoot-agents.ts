@@ -4,6 +4,10 @@
  */
 import { config } from './config.js';
 import { chatwootFetch } from './chatwoot-sync.js';
+import { obterRedis } from './lib/redis.js';
+
+const CACHE_AGENTS_KEY = `cw:agents:${config.chatwootAccountId}`;
+const CACHE_AGENTS_TTL_SEC = 60;
 
 export type AgentLite = {
   id: number;
@@ -35,11 +39,24 @@ function parseAgents(body: unknown): AgentLite[] {
   return out;
 }
 
-export async function listarAgentsAccountApi(): Promise<{
+export async function listarAgentsAccountApi(opts?: {
+  bypassCache?: boolean;
+}): Promise<{
   ok: boolean;
   agents: AgentLite[];
   motivo?: string;
 }> {
+  if (!opts?.bypassCache) {
+    try {
+      const raw = await obterRedis().get(CACHE_AGENTS_KEY);
+      if (raw) {
+        const agents = JSON.parse(raw) as AgentLite[];
+        if (Array.isArray(agents)) return { ok: true, agents };
+      }
+    } catch {
+      /* segue live */
+    }
+  }
   try {
     const r = await chatwootFetch(`/api/v1/accounts/${config.chatwootAccountId}/agents`);
     const body = await r.json().catch(() => []);
@@ -50,7 +67,13 @@ export async function listarAgentsAccountApi(): Promise<{
         motivo: `agents_list_http_${r.status}`,
       };
     }
-    return { ok: true, agents: parseAgents(body) };
+    const agents = parseAgents(body);
+    try {
+      await obterRedis().set(CACHE_AGENTS_KEY, JSON.stringify(agents), 'EX', CACHE_AGENTS_TTL_SEC);
+    } catch {
+      /* ignore */
+    }
+    return { ok: true, agents };
   } catch (err) {
     return {
       ok: false,

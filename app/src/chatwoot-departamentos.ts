@@ -5,6 +5,10 @@
  */
 import { config } from './config.js';
 import { chatwootFetch } from './chatwoot-sync.js';
+import { obterRedis } from './lib/redis.js';
+
+const CACHE_TEAMS_KEY = `cw:teams:${config.chatwootAccountId}`;
+const CACHE_TEAMS_TTL_SEC = 60;
 
 export type DepartamentoCw = {
   id: number;
@@ -17,11 +21,24 @@ function accountPath(suffix: string): string {
   return `/api/v1/accounts/${config.chatwootAccountId}${suffix}`;
 }
 
-export async function listarDepartamentosChatwoot(): Promise<{
+export async function listarDepartamentosChatwoot(opts?: {
+  bypassCache?: boolean;
+}): Promise<{
   ok: boolean;
   departamentos?: DepartamentoCw[];
   motivo?: string;
 }> {
+  if (!opts?.bypassCache) {
+    try {
+      const raw = await obterRedis().get(CACHE_TEAMS_KEY);
+      if (raw) {
+        const departamentos = JSON.parse(raw) as DepartamentoCw[];
+        if (Array.isArray(departamentos)) return { ok: true, departamentos };
+      }
+    } catch {
+      /* segue live */
+    }
+  }
   try {
     const r = await chatwootFetch(accountPath('/teams'));
     const data = (await r.json().catch(() => null)) as DepartamentoCw[] | { payload?: DepartamentoCw[] } | null;
@@ -29,18 +46,21 @@ export async function listarDepartamentosChatwoot(): Promise<{
       return { ok: false, motivo: `list_teams_http_${r.status}` };
     }
     const lista = Array.isArray(data) ? data : Array.isArray(data?.payload) ? data.payload : [];
-    return {
-      ok: true,
-      departamentos: lista
-        .map((t) => ({
-          id: Number(t.id),
-          name: String(t.name || ''),
-          description: t.description ?? null,
-          allow_auto_assign: t.allow_auto_assign,
-        }))
-        .filter((t) => t.id > 0)
-        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')),
-    };
+    const departamentos = lista
+      .map((t) => ({
+        id: Number(t.id),
+        name: String(t.name || ''),
+        description: t.description ?? null,
+        allow_auto_assign: t.allow_auto_assign,
+      }))
+      .filter((t) => t.id > 0)
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    try {
+      await obterRedis().set(CACHE_TEAMS_KEY, JSON.stringify(departamentos), 'EX', CACHE_TEAMS_TTL_SEC);
+    } catch {
+      /* ignore */
+    }
+    return { ok: true, departamentos };
   } catch (err) {
     return { ok: false, motivo: err instanceof Error ? err.message : String(err) };
   }
