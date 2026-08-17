@@ -63,3 +63,15 @@ export async function salvarEstadoCliente(telefone: string, dados: any): Promise
     console.error(`[estado] Erro ao salvar estado para ${telefone}:`, err);
   }
 }
+
+/**
+ * Remove o estado do cliente.
+ */
+export async function limparEstadoCliente(telefone: string): Promise<void> {
+  try {
+    await pool.query('DELETE FROM estado_cliente WHERE telefone = $1', [telefone]);
+    console.log(`[estado] Estado de ${telefone} removido com sucesso.`);
+  } catch (err) {
+    console.error(`[estado] Erro ao limpar estado para ${telefone}:`, err);
+  }
+}

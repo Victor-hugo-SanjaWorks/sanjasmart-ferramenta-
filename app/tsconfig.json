@@ -21,6 +21,18 @@
     "src/precos-tabelas-padrao.ts",
     "src/calculadora-minasplaca.ts",
     "src/vhsys-client.ts",
-    "src/rastreio-client.ts"
+    "src/rastreio-client.ts",
+    "src/conhecimento-store.ts",
+    "src/mensagens-api.ts",
+    "src/meta-config.ts",
+    "src/meta-oauth.ts",
+    "src/openrouter/*",
+    "src/openrouter/**/*.ts",
+    "src/treinador-core/*",
+    "src/treinador-core/**/*.ts",
+    "src/wa-instancias-rotas.ts",
+    "src/webhook-meta.ts",
+    "src/whatsapp-linhas-painel.ts",
+    "src/historico-minasplaca.ts"
   ]
 }

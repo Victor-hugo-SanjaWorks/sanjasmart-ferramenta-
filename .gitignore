@@ -20,3 +20,27 @@ logs.txt
 
 # Dados runtime locais
 data/
+
+# --- github-sync ---
+.env
+.env.*
+!.env.example
+!.env*.example
+*.pem
+*.key
+*.p12
+node_modules/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.dbg/
+*.pyc
+emergencia-secrets/
+accounts.json
+openrouter.env
+stack.env
+techfala.env
+*.sqlite
+*.sqlite3

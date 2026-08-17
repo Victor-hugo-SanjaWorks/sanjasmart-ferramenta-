@@ -90,4 +90,25 @@ export const config = {
   chatwootWebhookSecret: process.env.CHATWOOT_WEBHOOK_SECRET?.trim() || undefined,
   /** Opcional — se vazio, obtido via Platform API do usuario SSO. */
   chatwootApiAccessToken: token('chatwoot api', 'CHATWOOT_API_ACCESS_TOKEN'),
+
+  // Shims / aliases para compatibilidade de tipos
+  openrouterReferer: (process.env.OPENROUTER_REFERER ?? '').trim(),
+  openrouterAppName: (process.env.OPENROUTER_APP_NAME ?? 'Sanja Smart').trim(),
+  openrouterBaseUrl: (process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1').trim(),
+  openrouterTokenTreinador: token('openrouter treinador', 'OPENROUTER_TOKEN'),
+  modeloChatOpenRouter: process.env.MODELO_CHAT_OPENROUTER?.trim(),
+  openaiToken: token('openai token', 'OPENAI_API_KEY'),
+  anthropicToken: token('anthropic', 'ANTHROPIC_API_KEY'),
+  groqToken: token('groq', 'GROQ_API_KEY'),
+  modeloChatGroq: process.env.MODELO_CHAT_GROQ?.trim(),
+  metaAppSecret: process.env.META_APP_SECRET?.trim(),
+  metaVerifyToken: process.env.META_VERIFY_TOKEN?.trim(),
+  metaAppId: process.env.META_APP_ID?.trim(),
+  metaPhoneNumberId: process.env.META_PHONE_NUMBER_ID?.trim(),
+  metaAccessToken: process.env.META_ACCESS_TOKEN?.trim(),
+  metaBusinessAccountId: process.env.META_BUSINESS_ACCOUNT_ID?.trim(),
+  chatwootMetaInboxId: process.env.CHATWOOT_META_INBOX_ID?.trim(),
+  metaInstanceName: process.env.META_INSTANCE_NAME?.trim(),
+  apiMensagensToken: process.env.API_MENSAGENS_TOKEN?.trim(),
+  appSlug: 'sanjasmart',
 };

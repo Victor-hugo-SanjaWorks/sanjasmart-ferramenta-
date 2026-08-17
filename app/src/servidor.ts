@@ -38,7 +38,7 @@ import { garantirMidiasExemplo } from './midias-gatilho-store.js';
 const PAGINA_LOGIN = `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TechFala — Acesso</title>
+<title>Sanja Smart — Acesso</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <style>
   :root { --brand: #111224; --brand2: #1e2140; --accent: #ff2e88; }
@@ -106,7 +106,7 @@ const PAGINA_LOGIN = `<!DOCTYPE html>
     <div class="side">
       <canvas id="particles" class="pcanvas"></canvas>
       <div class="center">
-        <img class="brand-logo" src="https://xltw-api6-8lww.b2.xano.io/vault/4kRWyNwe/QezP_u6Ao3VM3NmOboZ2I76BdTg/-rHoZw../logotipo+%2811%29.png" alt="TechFala">
+        <img class="brand-logo" src="/assets/sanja-smart-logo-white.png" alt="Sanja Smart">
         <div class="slide" data-slide>
           <h2>Não somos um chatbot, somos o futuro</h2>
           <p>Utilize a nossa solução inteligente para transformar a comunicação da sua empresa com atendimento de qualidade e eficiência.</p>
@@ -126,8 +126,8 @@ const PAGINA_LOGIN = `<!DOCTYPE html>
 
     <div class="panel">
       <form class="card" onsubmit="entrar(event)">
-        <img class="card-logo" src="https://xltw-api6-8lww.b2.xano.io/vault/4kRWyNwe/uCvgJQ866Y83SgLRht-OpKfZ_MI/248OYQ../TechFala+%281%29.png" alt="TechFala">
-        <h1>Bem-vindo(a) de volta a TechFala</h1>
+        <img class="card-logo" src="/assets/sanja-smart-icon.png" alt="Sanja Smart">
+        <h1>Bem-vindo(a) de volta a Sanja Smart</h1>
         <div class="sub">Digite as suas credenciais de login para continuar</div>
 
         <div class="tabs">
@@ -477,6 +477,15 @@ export async function criarServidor() {
   app.get('/api/ui-flags', async () => ({
     ok: true,
     calendario: config.calendarioHabilitado,
+    branding: {
+      nome: String(process.env.APP_DISPLAY_NAME || process.env.APP_SLUG || 'Painel').replace(/^["']|["']$/g, ''),
+      logo: process.env.APP_LOGO_URL || '',
+      base_path: (() => {
+        const s = String(process.env.PUBLIC_BASE_PATH ?? '').trim();
+        if (!s || s === '/') return '';
+        return s.startsWith('/') ? s.replace(/\/$/, '') : `/${s.replace(/\/$/, '')}`;
+      })(),
+    },
   }));
 
   app.get('/', async (_req, reply) => reply.redirect('/phone.html?painel=whatsapp'));

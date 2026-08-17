@@ -112,6 +112,7 @@ const PUBLICOS: Array<string | RegExp> = [
   '/webhook/uazapi',
   '/favicon.ico',
   '/termos.html',
+  /^\/assets\//,
 ];
 
 export function ehCaminhoPublico(url: string): boolean {

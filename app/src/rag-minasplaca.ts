@@ -117,3 +117,11 @@ export async function indexarConhecimento(trechos: string[]): Promise<void> {
     });
   }
 }
+
+export async function indexarConhecimentoComFonte(trechos: string[], _fonteId?: string): Promise<void> {
+  return indexarConhecimento(trechos);
+}
+
+export async function removerConhecimentoPorFonte(_fonteId: string): Promise<void> {
+  // noop
+}

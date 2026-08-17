@@ -31,7 +31,7 @@ function slugDoApp(): string {
 export function contaOpenrouterApp(): ContaOpenrouterApp {
   const slug = slugDoApp();
   const tokenApp = (process.env.OPENROUTER_TOKEN_APP ?? '').trim();
-  const token = tokenApp || config.openrouterToken;
+  const token = tokenApp || config.openrouterToken || '';
   return {
     token,
     workspaceId: (process.env.OPENROUTER_WORKSPACE_ID ?? '').trim() || null,
