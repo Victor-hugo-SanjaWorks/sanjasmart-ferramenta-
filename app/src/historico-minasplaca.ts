@@ -5,8 +5,8 @@ import pg from 'pg';
 import { config } from './config.js';
 import type { RegistroHistorico } from './lib/tipos.js';
 import { canonizarTelefoneBr, variantesTelefoneBr, telefoneEhContatoValido } from './util/telefone.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export async function inicializarBancoHistorico(): Promise<void> {
   await pool.query(`

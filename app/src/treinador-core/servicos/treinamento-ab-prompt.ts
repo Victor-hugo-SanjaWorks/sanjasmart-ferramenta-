@@ -5,8 +5,8 @@
 import pg from 'pg';
 import { config } from '../../config.js';
 import { createHash } from 'node:crypto';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 async function garantirTabela(): Promise<void> {
   await pool.query(`

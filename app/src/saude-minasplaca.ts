@@ -4,7 +4,7 @@
 import type { FastifyInstance } from 'fastify';
 import { obterRedis } from './lib/redis.js';
 import { QdrantClient } from '@qdrant/js-client-rest';
-import pg from 'pg';
+import { pool } from './pg-pool.js';
 import { config } from './config.js';
 
 const redis = obterRedis();
@@ -20,9 +20,7 @@ async function verificarRedis(): Promise<boolean> {
 
 async function verificarPostgres(): Promise<boolean> {
   try {
-    const pool = new pg.Pool({ connectionString: config.databaseUrl });
     await pool.query('SELECT 1');
-    await pool.end();
     return true;
   } catch {
     return false;

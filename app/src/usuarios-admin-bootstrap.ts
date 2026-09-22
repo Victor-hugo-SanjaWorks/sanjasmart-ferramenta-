@@ -6,8 +6,8 @@ import pg from 'pg';
 import { config } from './config.js';
 import { cifrarSenhaCofre, decifrarSenhaCofre } from './credenciais-cofre.js';
 import { hashSenha, verificarSenha } from './usuarios-senha.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export async function reconciliarAdminDoEnv(): Promise<void> {
   const email = (config.adminEmail || '').trim().toLowerCase();

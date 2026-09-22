@@ -6,8 +6,9 @@
 import pg from 'pg';
 import { config } from '../../config.js';
 import { garantirTabelaPatchesPendentes } from './treinamento-config-schema.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+
 const STATUS_FINAIS = ['aprovado', 'cancelado', 'revertido'];
 
 async function garantirTabelaArquivo(): Promise<void> {

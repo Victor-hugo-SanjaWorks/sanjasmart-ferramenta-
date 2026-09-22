@@ -5,8 +5,8 @@
  */
 import pg from 'pg';
 import { config } from '../../config.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 /** Ultimos 3 prompts (ou chave) — padrao da frota. */
 export const MAX_VERSOES_BACKUP = 3;

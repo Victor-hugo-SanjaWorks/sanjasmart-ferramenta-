@@ -12,12 +12,12 @@ import {
 } from './treinamento-config-lote.js';
 import type { AlvoPatchTreinamento } from './treinamento-config-alvos.js';
 import { reindexarCatalogoTreinadorForcado } from './treinamento-config-vetorial.js';
+import { pool } from '../../pg-pool.js';
 import {
   MAX_VERSOES_BACKUP,
   podarVersoesAntigas,
 } from './treinamento-versoes-retencao.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export type VersaoAlvo = {
   id: number;

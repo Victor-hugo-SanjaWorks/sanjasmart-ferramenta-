@@ -251,10 +251,22 @@ export function extrairTelefoneDoPayloadChatwoot(payload: Record<string, unknown
   }
 
   const conversation = payload.conversation as Record<string, unknown> | undefined;
+  const convContact = conversation?.contact as Record<string, unknown> | undefined;
+  if (typeof convContact?.phone_number === 'string') {
+    return normalizarTelefone(convContact.phone_number);
+  }
+
   const convMeta = conversation?.meta as Record<string, unknown> | undefined;
   const convSender = convMeta?.sender as Record<string, unknown> | undefined;
   if (typeof convSender?.phone_number === 'string') {
     return normalizarTelefone(convSender.phone_number);
+  }
+
+  if (typeof conversation?.source_id === 'string' && conversation.source_id.trim()) {
+    const s = conversation.source_id.trim();
+    if (/^\+?\d{8,15}$/.test(s)) {
+      return normalizarTelefone(s);
+    }
   }
 
   return null;
@@ -319,6 +331,7 @@ async function buscarContatoId(telefone: string): Promise<number | null> {
     const r = await chatwootFetch(
       `/api/v1/accounts/${config.chatwootAccountId}/contacts/search?q=${encodeURIComponent(q)}`,
     );
+    if (r.status === 429) break;
     if (!r.ok) continue;
     const data = (await r.json()) as { payload?: Array<{ id?: number; phone_number?: string }> };
     const lista = data.payload ?? [];
@@ -566,4 +579,44 @@ export async function reconciliarSincroniaPausas(
   }
 
   return { ok: true, total: resultados.length, corrigidos, resultados };
+}
+
+export async function marcarMensagensEnviadasNoChatwoot(telefone: string): Promise<void> {
+  try {
+    const contactId = (await obterContactIdCacheado(telefone)) ?? (await buscarContatoId(telefone));
+    if (!contactId) return;
+
+    const resConvs = await chatwootFetch(
+      `/api/v1/accounts/${config.chatwootAccountId}/contacts/${contactId}/conversations`,
+    );
+    if (!resConvs.ok) return;
+
+    const convsData = (await resConvs.json()) as { payload?: Array<{ id: number }> };
+    const convId = convsData.payload?.[0]?.id;
+    if (!convId) return;
+
+    const resMsgs = await chatwootFetch(
+      `/api/v1/accounts/${config.chatwootAccountId}/conversations/${convId}/messages`,
+    );
+    if (!resMsgs.ok) return;
+
+    const msgsData = (await resMsgs.json()) as {
+      payload?: Array<{ id: number; message_type: number | string; status: string }>;
+    };
+    const messages = msgsData.payload ?? [];
+
+    for (const m of messages) {
+      if ((m.message_type === 1 || m.message_type === 'outgoing') && m.status !== 'sent') {
+        void chatwootFetch(
+          `/api/v1/accounts/${config.chatwootAccountId}/conversations/${convId}/messages/${m.id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'sent' }),
+          },
+        ).catch(() => {});
+      }
+    }
+  } catch (err) {
+    console.error('[chatwoot-sync] Falha ao marcar mensagens como sent:', err);
+  }
 }

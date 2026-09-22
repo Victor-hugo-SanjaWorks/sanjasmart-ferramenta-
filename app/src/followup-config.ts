@@ -9,8 +9,8 @@
  */
 import pg from 'pg';
 import { config } from './config.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export const INSTRUCAO_PADRAO =
   'Você deve realizar um follow-up com o cliente apenas se ele iniciou um pedido/cotação e não concluiu. ' +

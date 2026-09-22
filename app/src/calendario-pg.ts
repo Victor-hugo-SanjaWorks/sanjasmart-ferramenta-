@@ -6,8 +6,8 @@ import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { config } from './config.js';
 import type { CalEstado, CalJobRow, CalJobStatus } from './calendario-tipos.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 const ESTADO_VAZIO: CalEstado = {
   agendas: [],

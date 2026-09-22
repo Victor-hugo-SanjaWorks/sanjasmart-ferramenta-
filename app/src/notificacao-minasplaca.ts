@@ -16,10 +16,11 @@
 import pg from 'pg';
 import { config } from './config.js';
 import { obterRedis } from './lib/redis.js';
-import { enviarTextoSimples } from './lib/evolution.js';
+import { enviarTextoCanal } from './lib/canal-envio.js';
 import { normalizarTelefone, telefoneEhContatoValido } from './util/telefone.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+
 const redis = obterRedis();
 
 const PREFIXO_DEDUPE = 'notif:humano:';
@@ -213,7 +214,7 @@ export async function notificarIntervencaoHumana(params: {
   const texto = montarMensagem(cfg.mensagem_modelo, { nomeCliente, telefoneCliente, motivo });
 
   try {
-    await enviarTextoSimples(config.evolutionInstance, destino, texto);
+    await enviarTextoCanal(config.evolutionInstance, destino, texto, 400);
     try { await redis.set(chaveDedupe, '1', 'EX', TTL_DEDUPE_SEG); } catch { /* ignore */ }
     console.log(`[notificacao] Intervencao humana notificada para ${destino} (cliente ${telefoneCliente})`);
     await registrarLog({

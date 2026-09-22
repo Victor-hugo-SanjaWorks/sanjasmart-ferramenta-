@@ -9,8 +9,8 @@ import { chatCompletionRaw } from '../host/chat-providers.js';
 import { registrarHistoricoConfiguracao } from '../host/historico-configuracao.js';
 import { obterBlocoTreinamentoWhatsapp } from './treinamento-whatsapp.js';
 import { normalizarTelefone } from '../../util/telefone.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export interface TreinamentoDiretoEntrada {
   telefoneAutor?: string;

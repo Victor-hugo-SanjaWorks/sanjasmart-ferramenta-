@@ -1,35 +1,34 @@
-# sanjasmart — sobe SO o app; postgres/redis/qdrant/directus sao os containers
-# tilit_* compartilhados (rede gmx_net). Traefik publica em https://sanjasmart.ia.sanjaworks.com.
-# Gerado por scripts/clonar-instancia.sh.
-
-networks:
-  gmx_net:
-    external: true
-    name: gmx_net
-  n8n_edge:
-    external: true
-    name: n8n_edge
-
+# sanjasmart no infra-ia-2. Estado no .195 via WireGuard.
 services:
   app:
-    build: ./app
+    image: ferramenta-sanjasmart-app:latest
     container_name: sanjasmart_app
-    networks: [gmx_net, n8n_edge]
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=n8n_edge
-      - traefik.http.routers.sanjasmart.rule=Host(`sanjasmart.ia.sanjaworks.com`)
-      - traefik.http.routers.sanjasmart.entrypoints=websecure
-      - traefik.http.routers.sanjasmart.tls.certresolver=le
-      - traefik.http.routers.sanjasmart.service=sanjasmart
-      - traefik.http.services.sanjasmart.loadbalancer.server.port=8111
-    ports:
-      - '0.0.0.0:8111:8111'
     env_file:
       - .env
+    ports:
+      - '10.88.0.2:8111:8111'
     volumes:
-      - ./.env:/app/.env:ro
       - ./prompt-cliente.txt:/app/prompt-cliente.txt:ro
       - ./data:/app/data:ro
       - ./data/crm-arquivos:/app/data/crm-arquivos
+      - ./app/public/phone.html:/app/public/phone.html:ro
+      - ./app/public/path-base.js:/app/public/path-base.js:ro
+      - ./app/public/prompt-markup.js:/app/public/prompt-markup.js:ro
+      - ./app/public/prompt-editor-ux.js:/app/public/prompt-editor-ux.js:ro
+      - ./app/public/midias-gatilho.js:/app/public/midias-gatilho.js:ro
+      - ./app/public/midias-gatilho.css:/app/public/midias-gatilho.css:ro
+      - ./data/midias-gatilho:/app/data/midias-gatilho
+      - ./.env:/app/.env:ro
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:'+(process.env.PORT||'8111')+'/health/live',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s

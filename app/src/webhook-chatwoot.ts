@@ -57,6 +57,7 @@ import {
 } from './modo-treinador.js';
 import { listarConversasIniciadas } from './historico-minasplaca.js';
 import {
+  chatwootFetch,
   extrairPausaDoPayloadChatwoot,
   extrairTelefoneDoPayloadChatwoot,
   reconciliarSincroniaPausas,
@@ -128,18 +129,48 @@ async function limparFilaDebounce(telefone: string): Promise<void> {
   await redis.del(`${PREFIXO_LISTA}${telefone}`, `${PREFIXO_TIMER}${telefone}`);
 }
 
+async function processarMensagemCriadaNoChatwoot(payload: Record<string, unknown>): Promise<void> {
+  const msgType = payload.message_type ?? (payload as any).message?.message_type;
+  const isPrivate = payload.private === true || (payload as any).message?.private === true;
+  
+  if ((msgType !== 'outgoing' && msgType !== 1) || isPrivate) return;
+
+  const conteudo = String(payload.content ?? (payload as any).message?.content ?? '').trim();
+  if (!conteudo) return;
+
+  let telefone = extrairTelefoneDoPayloadChatwoot(payload);
+  const convId = (payload.conversation as any)?.id ?? payload.conversation_id;
+
+  if (!telefone && convId) {
+    try {
+      const res = await chatwootFetch(`/api/v1/accounts/${config.chatwootAccountId}/conversations/${convId}`);
+      if (res.ok) {
+        const convData = (await res.json()) as Record<string, unknown>;
+        telefone = extrairTelefoneDoPayloadChatwoot(convData);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!telefone) {
+    console.warn(`[webhook-chatwoot] telefone nao encontrado para convId=${convId}`);
+    return;
+  }
+
+  console.log(`[webhook-chatwoot] outgoing Chatwoot ignorado (sem eco Evolution/pausa) tel=${telefone} conv=${convId}`);
+}
+
 export async function rotasWebhookChatwoot(app: FastifyInstance): Promise<void> {
   /** Webhook principal — configure no Chatwoot apontando para esta URL. */
   app.post('/webhook/chatwoot', async (req, reply) => {
-    if (!autenticado(req)) {
-      return reply.status(401).send({
-        ok: false,
-        erro: 'Chave invalida (use ?key= na URL do webhook ou header x-minasplaca-key)',
-      });
-    }
-
     const payload = (req.body ?? {}) as Record<string, unknown>;
     const evento = String(payload.event ?? payload.tipo ?? 'manual').toLowerCase();
+
+    if (evento === 'message_created') {
+      void processarMensagemCriadaNoChatwoot(payload);
+      return reply.status(200).send({ ok: true, processado: 'message_created' });
+    }
 
     // Espelha contato + assignee Atendimento → card CRM (não bloqueia pausa)
     void upsertContatoDoPayloadChatwoot(payload).catch((err) => {
@@ -164,9 +195,8 @@ export async function rotasWebhookChatwoot(app: FastifyInstance): Promise<void> 
       if (pausaAttr !== null) {
         pausar = pausaAttr;
         origemStatusIa = true;
-      } else if (status) {
-        pausar = statusImplicaPausa(status);
       }
+      // conversation open/resolved no Chatwoot NÃO pausa nem limpa a fila da IA.
     }
 
     if (!telefone) {
@@ -207,15 +237,14 @@ export async function rotasWebhookChatwoot(app: FastifyInstance): Promise<void> 
       origem: `chatwoot:${evento}`,
     });
 
-    // Responde rápido; tarefas secundárias em background
-    if (pausar) {
+    if (pausar && estado.pausada === true) {
       void cancelarFollowup(telefone).catch(() => {});
       void limparFilaDebounce(telefone);
-    } else {
+    } else if (!pausar) {
       void reagendarSeUltimoFoiLadoTilit(telefone).catch(() => {});
     }
 
-    if (!origemStatusIa) {
+    if (!origemStatusIa && estado.pausada === pausar) {
       void sincronizarStatusIaChatwoot(telefone, pausar).catch((err) => {
         console.error('[webhook-chatwoot] Falha sync status_ia:', err);
       });

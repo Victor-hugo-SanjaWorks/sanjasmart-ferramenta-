@@ -8,6 +8,7 @@ import {
 } from './chatwoot-assignments.js';
 import { transferirAtendentePorTelefone } from './chatwoot-atendentes.js';
 import { aposTransferenciaAtribuirEPausar } from './transfer-pos.js';
+import { notificarIntervencaoHumana } from './notificacao-minasplaca.js';
 
 export async function executarToolTransferencia(opts: {
   toolName: string;
@@ -38,6 +39,12 @@ export async function executarToolTransferencia(opts: {
       assigneeId: assign.assigneeId,
       assigneeNome: assign.assigneeNome,
     });
+
+    await notificarIntervencaoHumana({
+      telefoneCliente: telefone,
+      nomeCliente: opts.pushName,
+      motivo,
+    }).catch((err) => console.error('[transfer] notificacao falhou:', err));
 
     if (assign.ok) {
       const filaMsg = assign.assigneeNome
@@ -72,6 +79,12 @@ export async function executarToolTransferencia(opts: {
       assigneeNome: assign.assigneeNome || nomeOuEmail,
     });
 
+    await notificarIntervencaoHumana({
+      telefoneCliente: telefone,
+      nomeCliente: opts.pushName,
+      motivo,
+    }).catch((err) => console.error('[transfer] notificacao falhou:', err));
+
     if (assign.ok) {
       return (
         'Conversa transferida para atendente. IA pausada. ' +
@@ -79,6 +92,16 @@ export async function executarToolTransferencia(opts: {
       );
     }
     return `Falha ao atribuir atendente (${assign.motivo || 'erro'}). IA pausada. Diga que será atendido em breve.`;
+  }
+
+  if (toolName === 'pedir_ajuda_humana') {
+    const motivo = String(args.motivo || 'IA pediu ajuda humana').trim();
+    await notificarIntervencaoHumana({
+      telefoneCliente: telefone,
+      nomeCliente: opts.pushName,
+      motivo,
+    }).catch((err) => console.error('[transfer] notificacao falhou:', err));
+    return 'Time humano notificado. Chame transferir_departamento na mesma rodada se ainda não chamou. Não cite a notificação ao cliente.';
   }
 
   return `Tool ${toolName} nao reconhecida`;

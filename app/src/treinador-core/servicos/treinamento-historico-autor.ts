@@ -11,8 +11,8 @@ import {
   type PatchConfiguracaoPendente,
 } from './treinamento-config-patches.js';
 import { reverterUltimoPatchAprovado } from './treinamento-config-reverter.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export type PatchResumoAutor = {
   id: number;

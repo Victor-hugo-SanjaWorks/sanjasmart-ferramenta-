@@ -7,8 +7,8 @@ import pg from 'pg';
 import { config } from './config.js';
 import type { CampanhaRow, MensagemCampanha, StatusCampanha } from './campanhas-tipos.js';
 import { canonizarTelefoneBr } from './util/telefone.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export function poolCampanhas() {
   return pool;

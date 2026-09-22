@@ -30,9 +30,9 @@ async function aguardarDependencias(): Promise<void> {
     try {
       await redis.ping();
       const { default: pg } = await import('pg');
-      const pool = new pg.Pool({ connectionString: config.databaseUrl });
+      const { pool } = await import('./pg-pool.js');
+
       await pool.query('SELECT 1');
-      await pool.end();
       return;
     } catch {
       await new Promise((r) => setTimeout(r, 1000));
@@ -61,8 +61,8 @@ async function main(): Promise<void> {
   await inicializarBancoUsuarios();
   await inicializarBancoCrm();
   await inicializarFilaAtendimento();
+  await inicializarBancoCalendario();
   if (config.calendarioHabilitado) {
-    await inicializarBancoCalendario();
     await garantirAgendasDemoIa().catch((err) =>
       console.error('[init] agendas calendario demo:', err),
     );
@@ -77,6 +77,9 @@ async function main(): Promise<void> {
   iniciarWorkerFollowup();
   if (config.calendarioHabilitado) iniciarWorkerCalendario();
   iniciarWorkerCampanhas();
+  void import('./lib/evolution.js')
+    .then((m) => m.habilitarLeituraAutomatica(config.evolutionInstance))
+    .catch((err) => console.warn('[init] settings Evolution:', err));
   await iniciarServidor();
 
   setTimeout(() => {

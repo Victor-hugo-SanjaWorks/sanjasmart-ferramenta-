@@ -7,10 +7,10 @@ import { config } from './config.js';
 import { cifrarSenhaCofre } from './credenciais-cofre.js';
 import { reconciliarAdminDoEnv } from './usuarios-admin-bootstrap.js';
 import { hashSenha, verificarSenha } from './usuarios-senha.js';
+import { pool } from './pg-pool.js';
 
 export { alterarSenhaUsuario, obterCredenciaisParaCopia } from './usuarios-senha-ops.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export type RolePainel = 'admin' | 'agente';
 

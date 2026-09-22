@@ -1,6 +1,5 @@
 /**
- * Catálogo WhatsApp Tilit — projetos isolados da Minas.
- * Atendimento → Uaz (sanjaworks); Comercial/Dr Paulo → Evolution.
+ * Catálogo WhatsApp SanjaSmart — Evolution (2.25 / infra-3).
  */
 import { config } from '../config.js';
 
@@ -12,47 +11,30 @@ export type WaInstanciaMeta = {
   provider: WaProvider;
 };
 
-const ALIASES_ATENDIMENTO = new Set([
-  'atendimento',
-  'tilit',
-  'tilit-atendimento',
-  'tilit-atendimento-chatwoot',
-]);
-
 const ALIASES_EVO: Record<string, string> = {
-  comercial: 'tilit-comercial-chatwoot',
-  'tilit-comercial': 'tilit-comercial-chatwoot',
-  'dr-paulo': 'tilit-dr-paulo-ladeira-chatwoot',
-  'dr-paulo-ladeira': 'tilit-dr-paulo-ladeira-chatwoot',
-  'tilit-dr-paulo-ladeira': 'tilit-dr-paulo-ladeira-chatwoot',
+  principal: 'sanjasmart-principal',
+  sanjasmart: 'sanjasmart-principal',
+  'sanjasmart-principal': 'sanjasmart-principal',
 };
 
 function labelDe(name: string): string {
-  return name.replace(/-chatwoot$/i, '').replace(/^tilit-/i, '');
+  return name.replace(/-chatwoot$/i, '').replace(/^sanjasmart-/i, '') || name;
 }
 
 export function listaInstanciasWa(): WaInstanciaMeta[] {
   const out: WaInstanciaMeta[] = [];
 
   if (config.uazapiToken && config.uazapiBaseUrl) {
-    out.push({
-      name: 'atendimento',
-      label: 'atendimento',
-      provider: 'uazapi',
-    });
+    out.push({ name: 'atendimento', label: 'atendimento', provider: 'uazapi' });
   }
 
   const evo = (config.evolutionInstances?.length
     ? config.evolutionInstances
     : [config.evolutionInstance]
-  ).filter((n) => n && !/atendimento/i.test(n));
+  ).filter((n) => n && String(n).trim());
 
   for (const name of evo) {
-    out.push({
-      name,
-      label: labelDe(name),
-      provider: 'evolution',
-    });
+    out.push({ name, label: labelDe(name), provider: 'evolution' });
   }
   return out;
 }
@@ -63,11 +45,6 @@ export function resolverMetaInstancia(raw?: string | null): WaInstanciaMeta {
 
   const pedida = String(raw || '').trim().toLowerCase();
   if (!pedida) return lista[0];
-
-  if (ALIASES_ATENDIMENTO.has(pedida) || pedida === 'atendimento') {
-    const uaz = lista.find((i) => i.provider === 'uazapi');
-    if (uaz) return uaz;
-  }
 
   const canon = ALIASES_EVO[pedida] || pedida;
   const hit = lista.find(

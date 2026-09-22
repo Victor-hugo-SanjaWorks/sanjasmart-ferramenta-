@@ -6,12 +6,14 @@ import { config } from './config.js';
 import { adicionarAoDebounce, tentarComandoRecomecarAtendimento } from './debounce-minasplaca.js';
 import { iaEstaPausada } from './pausa-minasplaca.js';
 import { linhaTemLicencaIa } from './licenca-ia.js';
-import { jidParaTelefone } from './util/telefone.js';
+import { jidEhGrupoOuLista, jidEhLid, jidEnvioPreferindoLid, telefoneDeChaveWhatsapp } from './util/telefone.js';
 import type { ItemDebounce } from './lib/tipos.js';
 import { adicionarAoHistorico } from './historico-minasplaca.js';
+import { descobrirLidNoEvolution, lembrarJidEnvio } from './lib/wa-jid.js';
+import { marcarMensagensLidas, enviarPresenca } from './lib/evolution.js';
 
 interface MensagemUpsertData {
-  key?: { remoteJid?: string; fromMe?: boolean };
+  key?: { remoteJid?: string; remoteJidAlt?: string; fromMe?: boolean; id?: string; addressingMode?: string };
   message?: Record<string, unknown>;
   pushName?: string;
 }
@@ -175,9 +177,120 @@ function detectarTipo(rawMessage?: Record<string, unknown>): ItemDebounce['tipo'
   return 'texto';
 }
 
+async function transcreverComOpenRouter(base64Data: string, ext: string): Promise<string | null> {
+  if (!config.openrouterToken) return null;
+  try {
+    let fmt = 'ogg';
+    if (ext === 'mp3') fmt = 'mp3';
+    else if (ext === 'wav') fmt = 'wav';
+    else if (ext === 'm4a' || ext === 'aac') fmt = 'm4a';
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.openrouterToken}`,
+        'HTTP-Referer': config.publicUrl,
+        'X-Title': 'Sanja Smart',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'input_audio',
+                input_audio: {
+                  data: base64Data,
+                  format: fmt,
+                },
+              },
+              {
+                type: 'text',
+                text: 'Transcreva o áudio com fidelidade para o português. Responda APENAS o texto falado, sem aspas, sem pontuação inventada e sem comentários adicionais.',
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      console.error(`[webhook] Erro ao transcrever via OpenRouter (${res.status}):`, await res.text());
+      return null;
+    }
+
+    const json = (await res.json()) as any;
+    const texto = json.choices?.[0]?.message?.content?.trim();
+    return texto || null;
+  } catch (err) {
+    console.error(`[webhook] Erro na transcricao OpenRouter:`, err);
+    return null;
+  }
+}
+
+async function transcreverComGroq(blob: Blob, filename: string): Promise<string | null> {
+  if (!config.groqToken) return null;
+  try {
+    const formData = new FormData();
+    formData.append('file', blob, filename);
+    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('language', 'pt');
+
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.groqToken}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      console.error(`[webhook] Erro no Groq Whisper (${res.status}):`, await res.text());
+      return null;
+    }
+
+    const json = (await res.json()) as { text?: string };
+    return json.text?.trim() || null;
+  } catch (err) {
+    console.error(`[webhook] Erro ao chamar Groq Whisper:`, err);
+    return null;
+  }
+}
+
+async function transcreverComOpenAI(blob: Blob, filename: string): Promise<string | null> {
+  if (!config.openaiApiKey) return null;
+  try {
+    const formData = new FormData();
+    formData.append('file', blob, filename);
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'pt');
+
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.openaiApiKey}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      console.error(`[webhook] Erro na API do OpenAI Whisper (${res.status}):`, await res.text());
+      return null;
+    }
+
+    const json = (await res.json()) as { text?: string };
+    return json.text?.trim() || null;
+  } catch (err) {
+    console.error(`[webhook] Erro ao chamar OpenAI Whisper:`, err);
+    return null;
+  }
+}
+
 async function transcreverAudio(dados: any, instance: string): Promise<string | null> {
-  if (!config.openaiApiKey) {
-    console.warn('[webhook] OPENAI_API_KEY nao configurada no .env. Ignorando transcricao de audio.');
+  if (!config.openrouterToken && !config.openaiApiKey && !config.groqToken) {
+    console.warn('[webhook] Nenhuma chave de IA (OpenRouter, OpenAI ou Groq) configurada. Ignorando transcricao de audio.');
     return null;
   }
 
@@ -228,29 +341,30 @@ async function transcreverAudio(dados: any, instance: string): Promise<string | 
       }
     }
 
-    const buffer = Buffer.from(base64Data, 'base64');
-    const blob = new Blob([buffer], { type: mimeType });
+    let textoTranscrito: string | null = null;
 
-    const formData = new FormData();
-    formData.append('file', blob, `${messageId}.${ext}`);
-    formData.append('model', 'whisper-1');
-
-    console.log(`[webhook] Enviando audio para o OpenAI Whisper...`);
-    const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.openaiApiKey}`,
-      },
-      body: formData,
-    });
-
-    if (!whisperRes.ok) {
-      console.error(`[webhook] Erro na API do Whisper (${whisperRes.status}):`, await whisperRes.text());
-      return null;
+    // 1. Tenta transcrição nativa pelo OpenRouter (usando a chave já ativa do OpenRouter)
+    if (config.openrouterToken) {
+      console.log(`[webhook] Transcrevendo audio via OpenRouter (Gemini Audio)...`);
+      textoTranscrito = await transcreverComOpenRouter(base64Data, ext);
     }
 
-    const whisperJson = await whisperRes.json() as { text?: string };
-    const textoTranscrito = whisperJson.text?.trim();
+    // 2. Fallback para OpenAI Whisper se configurado
+    if (!textoTranscrito && config.openaiApiKey) {
+      console.log(`[webhook] Enviando audio para o OpenAI Whisper...`);
+      const buffer = Buffer.from(base64Data, 'base64');
+      const blob = new Blob([buffer], { type: mimeType });
+      textoTranscrito = await transcreverComOpenAI(blob, `${messageId}.${ext}`);
+    }
+
+    // 3. Fallback para Groq Whisper se configurado
+    if (!textoTranscrito && config.groqToken) {
+      console.log(`[webhook] Enviando audio para o Groq Whisper...`);
+      const buffer = Buffer.from(base64Data, 'base64');
+      const blob = new Blob([buffer], { type: mimeType });
+      textoTranscrito = await transcreverComGroq(blob, `${messageId}.${ext}`);
+    }
+
     if (textoTranscrito) {
       console.log(`[webhook] Audio transcrito com sucesso: "${textoTranscrito}"`);
       return textoTranscrito;
@@ -280,7 +394,7 @@ export async function rotasWebhook(app: FastifyInstance): Promise<void> {
         if (!remoteJid || remoteJid.endsWith('@g.us')) {
           return reply.status(200).send({ ok: true, ignorado: 'fromMe_sem_jid' });
         }
-        const telefone = jidParaTelefone(remoteJid);
+        const telefone = telefoneDeChaveWhatsapp(dados.key);
         const instance = payload.instance ?? config.evolutionInstance;
     if (!(await linhaTemLicencaIa(instance))) {
           return reply.status(200).send({ ok: true, ignorado: 'fromMe_sem_licenca' });
@@ -305,13 +419,30 @@ export async function rotasWebhook(app: FastifyInstance): Promise<void> {
       return reply.status(200).send({ ok: true, ignorado: 'fromMe' });
     }
 
-    const remoteJid = dados.key?.remoteJid ?? '';
-    if (!remoteJid) {
+    const remoteJidRaw = dados.key?.remoteJid ?? '';
+    if (!remoteJidRaw) {
       return reply.status(200).send({ ok: true, ignorado: 'sem_remoteJid' });
     }
 
-    const telefone = jidParaTelefone(remoteJid);
+    // Só 1:1 — nunca responder em grupo, lista ou newsletter. @lid é conversa 1:1.
+    if (jidEhGrupoOuLista(remoteJidRaw)) {
+      console.log(`[webhook] grupo/lista ignorado: ${remoteJidRaw}`);
+      return reply.status(200).send({ ok: true, ignorado: 'grupo_ou_lista' });
+    }
+
+    let remoteJid = jidEnvioPreferindoLid(dados.key);
+    const telefone = telefoneDeChaveWhatsapp(dados.key);
     const instance = payload.instance ?? config.evolutionInstance;
+    const msgId = String(dados.key?.id || '');
+    if (!jidEhLid(remoteJid)) {
+      const lid = await descobrirLidNoEvolution(instance, telefone);
+      if (lid) remoteJid = lid;
+    }
+    await lembrarJidEnvio(telefone, remoteJid);
+    if (msgId) {
+      void marcarMensagensLidas(instance, remoteJid, [msgId]);
+    }
+    void enviarPresenca(instance, remoteJid, 'available');
 
     
 

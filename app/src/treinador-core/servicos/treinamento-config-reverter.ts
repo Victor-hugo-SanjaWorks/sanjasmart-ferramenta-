@@ -15,8 +15,8 @@ import {
 import { reverterPatchViaVersoes } from './treinamento-versoes-store.js';
 import { reindexarCatalogoTreinadorForcado } from './treinamento-config-vetorial.js';
 import { registrarAuditAsync } from './treinamento-audit-log.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export async function reverterPatchConfiguracao(
   id: number,

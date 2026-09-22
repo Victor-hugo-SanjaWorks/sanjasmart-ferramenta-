@@ -4,8 +4,8 @@
  */
 import pg from 'pg';
 import { config } from './config.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 /**
  * Inicializa a tabela no banco de dados se não existir.

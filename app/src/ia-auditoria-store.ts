@@ -6,8 +6,8 @@ import pg from 'pg';
 import { randomUUID } from 'crypto';
 import { config } from './config.js';
 import type { SaidaCamada } from './agente-schema.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export type OrigemAuditoria = 'atendimento' | 'treinador';
 

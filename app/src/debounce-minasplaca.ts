@@ -2,7 +2,7 @@
  * Debounce Minas Placa — acumula mensagens e dispara o agente.
  */
 import { obterRedis } from './lib/redis.js';
-import { jidParaTelefone } from './util/telefone.js';
+import { jidEhGrupoOuLista, jidParaTelefone } from './util/telefone.js';
 import { logEvento } from './util/log-eventos.js';
 import { gerarRespostaAgente } from './agente-minasplaca.js';
 import { tentarEnviarCanal } from './lib/canal-envio.js';
@@ -64,6 +64,11 @@ export async function adicionarAoDebounce(item: ItemDebounce): Promise<void> {
   const telefone = item.telefone;
   const instance = item.instance || config.evolutionInstance;
 
+  if (jidEhGrupoOuLista(item.remoteJid)) {
+    console.log(`[debounce] grupo/lista ignorado: ${item.remoteJid}`);
+    return;
+  }
+
   if (mensagemEhComandoRecomecar(item.conteudo || '')) {
     try {
       await executarRecomecarAtendimento(telefone, 'enqueue');
@@ -103,6 +108,10 @@ export async function adicionarAoDebounce(item: ItemDebounce): Promise<void> {
 }
 
 export async function processarContato(remoteJid: string): Promise<void> {
+  if (jidEhGrupoOuLista(remoteJid)) {
+    console.log(`[debounce] processarContato ignorou grupo/lista: ${remoteJid}`);
+    return;
+  }
   const telefone = jidParaTelefone(remoteJid);
   const chaveLista = `${PREFIXO_LISTA}${telefone}`;
   const chaveLock = `${PREFIXO_LOCK}${telefone}`;
@@ -160,12 +169,18 @@ export async function processarContato(remoteJid: string): Promise<void> {
     ]);
 
     console.log(`[debounce] enviando resposta para ${telefone}: ${resposta.slice(0, 80)}`);
+    const destinoJid = itens.find((i) => i.remoteJid)?.remoteJid || remoteJid;
     const resultado = await tentarEnviarCanal(telefone, resposta, instanciaEnvio, {
       fragmentar: true,
+      remoteJid: destinoJid,
     });
+    console.log(`[debounce] destinoJid=${destinoJid}`);
     console.log(`[debounce] resultado envio (${instanciaEnvio}):`, resultado);
 
     if (resultado.enviado) {
+      void import('./chatwoot-sync.js')
+        .then((m) => m.marcarMensagensEnviadasNoChatwoot(telefone))
+        .catch(() => {});
       await agendarFollowup(telefone).catch(err => console.error('[debounce] erro ao agendar follow-up:', err));
     }
   } catch (err) {

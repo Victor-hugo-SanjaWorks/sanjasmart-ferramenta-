@@ -104,12 +104,16 @@ export function credenciaisCorretas(_email: string, _senha: string): boolean {
 
 const PUBLICOS: Array<string | RegExp> = [
   '/login',
+  '/login.html',
   '/logout',
   '/health',
   '/api/ui-flags',
+  /^\/api\/mensagens/,
   '/webhook/evolution',
-  '/webhook/chatwoot',
+  /^\/webhook\/chatwoot/,
   '/webhook/uazapi',
+  '/webhook/meta',
+  '/api/meta/oauth/callback',
   '/favicon.ico',
   '/termos.html',
   /^\/assets\//,

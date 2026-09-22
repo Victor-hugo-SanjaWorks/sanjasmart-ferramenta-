@@ -5,13 +5,11 @@ import { randomUUID } from 'node:crypto';
 import { createReadStream, existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { Readable } from 'node:stream';
-import pg from 'pg';
 import { config } from './config.js';
 import { carregarBoardBatched, type CrmContatoBoard } from './crm-board-load.js';
 import { invalidateBoardCache, obterBoardComCache } from './crm-board-http.js';
 import { colunaEntradaPrincipal, garantirSchemaPipelines } from './crm-pipelines.js';
-
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+import { pool } from './pg-pool.js';
 
 const CRM_UPLOAD_ROOT = resolve(process.cwd(), 'data', 'crm-arquivos');
 
@@ -328,43 +326,52 @@ export async function inicializarBancoCrm(): Promise<void> {
 
 async function montarContato(row: Record<string, unknown>): Promise<CrmContato> {
   const id = String(row.id);
-  const [tags, arquivos, tarefas, notas, interacoes, timeline, campos] =
-    await Promise.all([
-      pool.query<{ tag: string }>(
-        `SELECT tag FROM crm_contato_tags WHERE contato_id = $1 ORDER BY tag`,
-        [id],
-      ),
-      pool.query(
-        `SELECT id, nome, criado_em AS "criadoEm",
-                caminho, mime, tamanho
-         FROM crm_contato_arquivos WHERE contato_id = $1 ORDER BY criado_em`,
-        [id],
-      ),
-      pool.query(
-        `SELECT id, titulo, vencimento, status, descricao, responsavel
-         FROM crm_contato_tarefas WHERE contato_id = $1 ORDER BY titulo`,
-        [id],
-      ),
-      pool.query(
-        `SELECT id, texto, autor, email, criado_em AS "criadoEm"
-         FROM crm_contato_notas WHERE contato_id = $1 ORDER BY criado_em DESC`,
-        [id],
-      ),
-      pool.query(
-        `SELECT id, descricao, data, hora, responsavel
-         FROM crm_contato_interacoes WHERE contato_id = $1`,
-        [id],
-      ),
-      pool.query(
-        `SELECT id, tipo, titulo, detalhe, em
-         FROM crm_contato_timeline WHERE contato_id = $1 ORDER BY em ASC`,
-        [id],
-      ),
-      pool.query<{ chave: string; valor: string }>(
-        `SELECT chave, valor FROM crm_contato_campos WHERE contato_id = $1`,
-        [id],
-      ),
-    ]);
+  const client = await pool.connect();
+  let tags: { rows: { tag: string }[] };
+  let arquivos: { rows: Record<string, unknown>[] };
+  let tarefas: { rows: Record<string, unknown>[] };
+  let notas: { rows: Record<string, unknown>[] };
+  let interacoes: { rows: Record<string, unknown>[] };
+  let timeline: { rows: Record<string, unknown>[] };
+  let campos: { rows: { chave: string; valor: string }[] };
+  try {
+    tags = await client.query<{ tag: string }>(
+      `SELECT tag FROM crm_contato_tags WHERE contato_id = $1 ORDER BY tag`,
+      [id],
+    );
+    arquivos = await client.query(
+      `SELECT id, nome, criado_em AS "criadoEm",
+              caminho, mime, tamanho
+       FROM crm_contato_arquivos WHERE contato_id = $1 ORDER BY criado_em`,
+      [id],
+    );
+    tarefas = await client.query(
+      `SELECT id, titulo, vencimento, status, descricao, responsavel
+       FROM crm_contato_tarefas WHERE contato_id = $1 ORDER BY titulo`,
+      [id],
+    );
+    notas = await client.query(
+      `SELECT id, texto, autor, email, criado_em AS "criadoEm"
+       FROM crm_contato_notas WHERE contato_id = $1 ORDER BY criado_em DESC`,
+      [id],
+    );
+    interacoes = await client.query(
+      `SELECT id, descricao, data, hora, responsavel
+       FROM crm_contato_interacoes WHERE contato_id = $1`,
+      [id],
+    );
+    timeline = await client.query(
+      `SELECT id, tipo, titulo, detalhe, em
+       FROM crm_contato_timeline WHERE contato_id = $1 ORDER BY em ASC`,
+      [id],
+    );
+    campos = await client.query<{ chave: string; valor: string }>(
+      `SELECT chave, valor FROM crm_contato_campos WHERE contato_id = $1`,
+      [id],
+    );
+  } finally {
+    client.release();
+  }
 
   const camposPersonalizados: Record<string, string> = {};
   for (const c of campos.rows) camposPersonalizados[c.chave] = c.valor;
@@ -898,27 +905,34 @@ export async function moverContato(
   colunaDestinoId: string,
 ): Promise<CrmContato | null> {
   invalidateBoardCache();
-  const atual = await obterContato(id);
-  if (!atual) return null;
-  if (atual.colunaId === colunaDestinoId) return atual;
-
-  const colDest = await pool.query<{ titulo: string }>(
-    `SELECT titulo FROM crm_colunas WHERE id = $1`,
-    [colunaDestinoId],
-  );
-  const tituloCol = colDest.rows[0]?.titulo || colunaDestinoId;
-  const agora = new Date().toISOString();
-  const timeline = [
-    ...atual.timeline,
-    {
-      id: uid('tl'),
-      tipo: 'kanban',
-      titulo: 'Movido no Kanban',
-      detalhe: `Para a coluna "${tituloCol}"`,
-      em: agora,
-    },
-  ];
-  return atualizarContato(id, { colunaId: colunaDestinoId, timeline });
+  const client = await pool.connect();
+  try {
+    const atual = await client.query<{ coluna_id: string }>(
+      `SELECT coluna_id FROM crm_contatos WHERE id = $1`,
+      [id],
+    );
+    if (!atual.rows[0]) return null;
+    if (atual.rows[0].coluna_id === colunaDestinoId) {
+      return obterContato(id);
+    }
+    const colDest = await client.query<{ titulo: string }>(
+      `SELECT titulo FROM crm_colunas WHERE id = $1`,
+      [colunaDestinoId],
+    );
+    const tituloCol = colDest.rows[0]?.titulo || colunaDestinoId;
+    await client.query(
+      `UPDATE crm_contatos SET coluna_id = $2, atualizado_em = NOW() WHERE id = $1`,
+      [id, colunaDestinoId],
+    );
+    await client.query(
+      `INSERT INTO crm_contato_timeline (id, contato_id, tipo, titulo, detalhe, em)
+       VALUES ($1,$2,'kanban','Movido no Kanban',$3,NOW())`,
+      [uid('tl'), id, `Para a coluna "${tituloCol}"`],
+    );
+  } finally {
+    client.release();
+  }
+  return obterContato(id);
 }
 
 export async function removerContato(id: string): Promise<boolean> {

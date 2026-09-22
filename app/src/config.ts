@@ -15,7 +15,7 @@ function token(
 
 export const config = {
   porta: Number(process.env.PORT ?? '8096'),
-  buildId: 'tilit-clean-2026-07-10',
+  buildId: 'sanjasmart-2026-08-25-lid',
 
   /** URL pública do painel (CORS, HTTP-Referer). Cada clone define a sua via env. */
   publicUrl: (process.env.PUBLIC_URL ?? 'https://iatilit.sanjaworks.com').replace(/\/$/, ''),

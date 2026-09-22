@@ -5,8 +5,8 @@
 import pg from 'pg';
 import { config } from './config.js';
 import { normalizarTelefone } from './util/telefone.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export type TelefoneTreinador = {
   id: number;

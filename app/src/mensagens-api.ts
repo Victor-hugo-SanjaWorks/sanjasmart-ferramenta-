@@ -9,8 +9,8 @@ import { timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import pg from 'pg';
 import { config } from './config.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 const LIMITE_PADRAO = 100;
 const LIMITE_MAX = 500;
@@ -30,14 +30,19 @@ function traduzirAutor(role: string): { direcao: 'entrada' | 'saida'; autor: str
   return { direcao: 'saida', autor: 'ia' };
 }
 
+import { estaAutenticado } from './auth-minasplaca.js';
+
 function tokenValido(req: FastifyRequest): boolean {
-  const esperado = config.apiMensagensToken;
+  if (estaAutenticado(req)) return true;
+
+  const esperado = config.apiMensagensToken || config.adminKey;
   if (!esperado) return false;
 
   const auth = req.headers.authorization;
   const bearer = auth?.startsWith('Bearer ') ? auth.slice(7).trim() : '';
-  const header = req.headers['x-api-key'];
-  const recebido = bearer || (typeof header === 'string' ? header.trim() : '');
+  const header = req.headers['x-api-key'] || req.headers['x-minasplaca-key'];
+  const queryKey = (req.query as { key?: string })?.key;
+  const recebido = bearer || (typeof header === 'string' ? header.trim() : queryKey || '');
   if (!recebido) return false;
 
   const a = Buffer.from(recebido);

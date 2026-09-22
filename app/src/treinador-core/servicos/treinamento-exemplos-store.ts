@@ -6,8 +6,9 @@ import pg from 'pg';
 import { config } from '../../config.js';
 import type { ExemploTreino } from './treinamento-exemplos-format.js';
 import { formatarExemplosFewShot } from './treinamento-exemplos-format.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+
 let ready = false;
 
 export async function garantirTabelaExemplosTreino(): Promise<void> {

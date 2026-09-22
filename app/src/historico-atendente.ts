@@ -73,7 +73,7 @@ export async function registrarMsgAtendente(opts: {
   ]);
 
   let pausada = false;
-  const auto = opts.autoPausar !== false;
+  const auto = opts.autoPausar === true;
   if (auto && !(await iaEstaPausada(telefone))) {
     await definirPausa(telefone, true, {
       motivo: 'Atendente enviou mensagem',

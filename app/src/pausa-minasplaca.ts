@@ -11,6 +11,7 @@ import { uazStatus } from './lib/uazapi.js';
 import { listaInstanciasWa } from './lib/whatsapp-instancias.js';
 import { normalizarTelefone, telefoneEhContatoValido, canonizarTelefoneBr } from './util/telefone.js';
 import { publicarEventoPainel } from './painel-eventos.js';
+import { pool } from './pg-pool.js';
 
 /** IA não pode ser religada / considerada ativa sem WhatsApp conectado. */
 export class IaBloqueadaPorWhatsappError extends Error {
@@ -41,15 +42,22 @@ export async function whatsappConectadoParaIa(): Promise<boolean> {
   return status.conectado === true;
 }
 
-async function exigirWhatsappParaReligiar(pausar: boolean): Promise<void> {
-  if (pausar) return;
-  if (!(await whatsappConectadoParaIa())) {
-    throw new IaBloqueadaPorWhatsappError();
-  }
+/** Pausa só no painel/CRM/API. Chatwoot, sync e transferência da IA não pausam. */
+function origemPausaAutomatica(origem?: string): boolean {
+  const o = String(origem || '').toLowerCase();
+  return (
+    o.startsWith('chatwoot:')
+    || o.startsWith('sync-')
+    || o.startsWith('ia:')
+    || o === 'historico-atendente'
+  );
+}
+
+async function exigirWhatsappParaReligiar(_pausar: boolean): Promise<void> {
+  /* Sanja Smart: religar não depende do WhatsApp. Sem sessão, só não envia. */
 }
 
 const redis = obterRedis();
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 const PREFIXO = 'ia:pausada:';
 const CHAVE_GLOBAL = 'ia:pausa_global';
@@ -181,6 +189,16 @@ export async function definirPausa(
       atualizado_em: new Date().toISOString(),
     };
   }
+  if (pausar && origemPausaAutomatica(meta.origem)) {
+    const nSkip = canonizarTelefoneBr(telefone);
+    console.log(`[pausa] ignorando pausa automatica origem=${meta.origem} tel=${nSkip}`);
+    const atual = nSkip ? await obterEstadoPausa(nSkip) : null;
+    return atual ?? {
+      pausada: false,
+      telefone: nSkip,
+      atualizado_em: new Date().toISOString(),
+    };
+  }
   await exigirWhatsappParaReligiar(pausar);
   const n = validarTelefone(telefone);
   const estado: EstadoPausa = {
@@ -227,9 +245,8 @@ export async function definirPausa(
   return estado;
 }
 
-/** True se a IA nao deve responder (WhatsApp off, pausa global ou pausa do contato). */
+/** True se a IA nao deve responder (pausa global ou pausa do contato). WhatsApp off nao pausa. */
 export async function iaEstaPausada(telefone: string): Promise<boolean> {
-  if (!(await whatsappConectadoParaIa())) return true;
   if (await pausaGlobalAtiva()) return true;
   const n = canonizarTelefoneBr(telefone);
   if (!n) return false;

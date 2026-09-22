@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanja Smart — Painel</title>
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
-  <link rel="apple-touch-icon" href="/assets/favicon.png">
-  <link rel="dns-prefetch" href="https://chat.sanjaworks.com">
+  <!-- Favicon vazio por padrao (clones nao herdam o icone da Tilit);
+       branding.js troca pela logo do cliente quando existir. -->
+  <link rel="icon" href="data:," id="app-favicon">
+  <link rel="apple-touch-icon" href="data:," id="app-touch-icon">
+<link rel="dns-prefetch" href="https://chat.sanjaworks.com">
   <link rel="preconnect" href="https://chat.sanjaworks.com" crossorigin>
   <style>
     * { box-sizing: border-box; }
@@ -5870,10 +5872,6 @@
     }
 
     async function religarSelecionadas() {
-      if (!whatsappConectadoAgora()) {
-        alert('WhatsApp desconectado — a IA não pode ficar ativa.');
-        return;
-      }
       await aplicarPausaLote(telefonesSelecionadosConversas(), false);
     }
 
@@ -6532,17 +6530,14 @@
       const banner = document.getElementById('ops-wa-lock-banner');
       if (banner) banner.hidden = waOk !== false;
       const control = document.getElementById('ops-ia-control');
-      if (control) control.classList.toggle('is-locked', waOk === false);
+      if (control) control.classList.remove('is-locked');
       const btnContato = document.getElementById('btn-ligar-ia-contato');
-      if (btnContato) btnContato.disabled = waOk === false;
+      if (btnContato) btnContato.disabled = false;
       const btnLote = document.getElementById('btn-religar-selecionadas');
-      if (btnLote) btnLote.disabled = waOk === false;
+      if (btnLote) btnLote.disabled = false;
       const toggle = document.getElementById('global-ia-toggle');
       if (!toggle) return;
-      if (waOk === false) {
-        toggle.checked = false;
-        toggle.disabled = true;
-      } else if (window.__iaPausaRedis !== null) {
+      if (window.__iaPausaRedis !== null) {
         toggle.disabled = false;
         toggle.checked = !window.__iaPausaRedis;
       }
@@ -6592,12 +6587,6 @@
 
     async function onGlobalToggleChange(el) {
       if (!el) return;
-      if (el.checked && !whatsappConectadoAgora()) {
-        el.checked = false;
-        alert('WhatsApp desconectado — a IA não pode ficar ativa.');
-        aplicarBloqueioIaPorWhatsapp();
-        return;
-      }
       const pausar = !el.checked;
       const prev = el.checked;
       el.disabled = true;
@@ -6684,10 +6673,6 @@
     async function toggleContatoPausa(pausar) {
       const tel = telefonePausaInput();
       if (!tel) { alert('Informe o telefone do cliente.'); return; }
-      if (!pausar && !whatsappConectadoAgora()) {
-        alert('WhatsApp desconectado — a IA não pode ficar ativa.');
-        return;
-      }
       try {
         const res = await fetch('/api/ia/pausa-contato', {
           method: 'POST',

@@ -1,8 +1,6 @@
 /**
- * Após transferência: espelha assignee no CRM e confirma pausa da IA.
- * Sem envio de mensagem ao cliente — só atribuição + pausa.
+ * Após transferência: espelha assignee no CRM. Sem pausar a IA.
  */
-import { definirPausa } from './pausa-minasplaca.js';
 import { cancelarFollowup } from './followup-minasplaca.js';
 import { resolverPorAgentId } from './crm-assignee-map.js';
 import {
@@ -21,13 +19,9 @@ export async function aposTransferenciaAtribuirEPausar(opts: {
   const { telefone, departamento, motivo, toolName, assigneeId, assigneeNome } = opts;
 
   try {
-    await definirPausa(telefone, true, {
-      motivo: `Transferência IA → ${departamento}: ${motivo}`,
-      origem: `ia:${toolName}`,
-    });
     await cancelarFollowup(telefone).catch(() => {});
   } catch (err) {
-    console.error('[transfer] pausa IA falhou:', err);
+    console.error('[transfer] follow-up apos transferencia falhou:', err);
   }
 
   if (!assigneeId) return;

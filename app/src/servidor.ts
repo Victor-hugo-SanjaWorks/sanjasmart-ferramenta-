@@ -33,274 +33,315 @@ import { rotasCalendario } from './calendario-rotas.js';
 import { rotasCampanhas } from './campanhas-rotas.js';
 import { rotasMidiasGatilho } from './midias-gatilho-rotas.js';
 import { rotasPromptTools } from './prompt-tools-rotas.js';
+import { rotasMensagensApi } from './mensagens-api.js';
 import { garantirMidiasExemplo } from './midias-gatilho-store.js';
 
 const PAGINA_LOGIN = `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sanja Smart — Acesso</title>
+<title>TechFala — Acesso</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <style>
-  :root { --brand: #111224; --brand2: #1e2140; --accent: #ff2e88; }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; }
-  .wrap { display: flex; min-height: 100vh; }
-
-  /* Painel esquerdo (branding) */
-  .side {
-    flex: 1; position: relative; color: #fff; padding: 40px 48px;
-    display: flex; flex-direction: column; align-items: center;
-    background: radial-gradient(circle at 10% 10%, var(--brand), #050505);
-    overflow: hidden; text-align: center;
+  @font-face {
+    font-family: 'TF Sans';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/assets/login/fonts/hanken.woff2") format('woff2');
   }
-  .pcanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
-  .side .center, .side .legal { position: relative; z-index: 1; }
-  .brand-logo { width: 210px; max-width: 62%; margin: 0 auto 8px; display: block; }
-  .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 460px; }
-  .slide { display: none; }
-  .slide.active { display: block; animation: fade .6s ease; }
-  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  .slide h2 { font-size: 30px; line-height: 1.25; margin: 0 0 16px; font-weight: 800; }
-  .slide p { color: #c9cbe0; font-size: 15px; line-height: 1.7; margin: 0; }
-  .dots { display: flex; gap: 9px; justify-content: center; margin-top: 34px; }
-  .dots span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.28); cursor: pointer; transition: background .2s, width .2s; }
-  .dots span.on { background: #fff; width: 22px; border-radius: 5px; }
-  .legal { font-size: 12px; color: #8a8da8; }
-  .legal a { color: #c9cbe0; text-decoration: none; }
+  @font-face {
+    font-family: 'TF Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/assets/login/fonts/plex-mono-500.woff2") format('woff2');
+  }
 
-  /* Painel direito (form) */
-  .panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: #fff; }
-  .card { width: 100%; max-width: 380px; }
-  .card-logo { width: 54px; height: 54px; object-fit: contain; display: block; margin: 0 auto 14px; }
-  .card h1 { font-size: 22px; margin: 0 0 6px; text-align: center; }
-  .card .sub { color: #666; font-size: 14px; margin-bottom: 22px; text-align: center; }
-  .tabs { display: flex; gap: 6px; background: #f1f2f5; border-radius: 10px; padding: 5px; margin-bottom: 24px; }
-  .tab { flex: 1; border: none; border-radius: 7px; padding: 9px; font-size: 14px; font-weight: 600; cursor: pointer;
-    background: transparent; color: #888; }
-  .tab.on { background: #fff; color: var(--brand); box-shadow: 0 0 5px rgba(0,0,0,0.06); }
-  .ou { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #999; font-size: 13px; }
-  .ou span { flex: 1; height: 1px; background: #e6e6e6; }
-  label { display: block; font-size: 13px; color: #333; margin-bottom: 7px; font-weight: 500; }
-  .field { margin-bottom: 18px; }
-  .input-wrap { position: relative; }
-  input[type=email], input[type=password], input[type=text] {
-    width: 100%; padding: 12px 13px; border: 1px solid #dcdfe4; border-radius: 10px; font-size: 15px;
+  :root {
+    --ink: #2b2350;
+    --muted: #837bab;
+    --card-bg: rgba(255, 255, 255, 0.16);
+    --card-border: rgba(255, 255, 255, 0.85);
+    --field-bg: rgba(255, 255, 255, 0.65);
+    --field-border: rgba(43, 35, 80, 0.14);
+    --navy: #241b40;
+    --accent: #ff2d87;
+    --page-base: #e9ebee;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    font-family: 'TF Sans', system-ui, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    background: var(--page-base);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* ---------- Fundo ---------- */
+  .stage-bg {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--page-base);
+    background-image: url("/assets/login/bg.jpg");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ---------- Cartão ---------- */
+  .card {
+    position: relative; z-index: 1;
+    width: min(92vw, 960px);
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.08)),
+      var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 26px;
+    backdrop-filter: blur(20px) saturate(120%) contrast(1.15) brightness(1.04);
+    -webkit-backdrop-filter: blur(20px) saturate(120%) contrast(1.15) brightness(1.04);
+    box-shadow: 0 40px 90px -30px rgba(43,35,80,0.4), 0 0 0 1px rgba(255,255,255,0.5) inset, 0 1px 0 rgba(255,255,255,0.6) inset;
+    display: flex;
+    min-height: 400px;
+    overflow: hidden;
+    animation: cardIn 0.7s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+  .panel { flex: 1; padding: clamp(1.75rem, 3vw, 3.25rem) clamp(1.75rem, 3vw, 3.5rem); display: flex; flex-direction: column; justify-content: center; position: relative; text-shadow: 0 1px 3px rgba(255,255,255,0.6); }
+  .panel--teaser { align-items: flex-start; text-align: left; }
+
+  .sanja-mark { position: absolute; top: 1.6rem; left: 1.75rem; width: 104px; height: auto; z-index: 3; pointer-events: none; }
+  @media (max-width: 760px) { .sanja-mark { width: 82px; top: 1rem; left: 1.25rem; } }
+
+  .techfala-mark { position: fixed; top: 1.75rem; left: 1.75rem; width: 150px; height: auto; z-index: 2; pointer-events: none; }
+  @media (max-width: 760px) { .techfala-mark { width: 108px; top: 1rem; left: 1rem; } }
+
+  h2.panel__title {
+    font-family: 'TF Sans', sans-serif; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.22em; font-size: clamp(1.15rem, 1vw + 0.9rem, 1.5rem); margin: 0 0 0.9em;
+  }
+
+  .btn {
+    border: none; border-radius: 999px; padding: 0.85em 1.7em; font-family: 'TF Sans', sans-serif;
+    font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: transform .12s, box-shadow .15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn--solid { background: var(--navy); color: #fff; width: 100%; padding: 0.9em; margin-top: 0.4rem; font-size: 0.9rem; letter-spacing: 0.02em; }
+  .btn--solid:hover { background: #322752; }
+  .btn--solid:disabled { opacity: .65; cursor: not-allowed; }
+
+  .social-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.8rem; }
+  .social-row a, .social-row button {
+    width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; flex: none;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px -6px rgba(43,35,80,0.35);
+    transition: transform .12s;
+    background: none; padding: 0; margin: 0; text-decoration: none; color: inherit; font: inherit; -webkit-tap-highlight-color: transparent;
+  }
+  .social-row a:visited { color: inherit; }
+  .social-row a:hover, .social-row button:hover { transform: translateY(-2px); }
+  .social-row svg { width: 26px; height: 26px; }
+
+  .partner-row { margin-top: 1.15rem; text-align: center; }
+  .partner-row__label {
+    display: block; font-family: 'TF Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.6rem;
+  }
+  .partner-row__logos { display: flex; align-items: center; justify-content: center; gap: 0.55rem; flex-wrap: wrap; }
+  .partner-chip {
+    border: 1px solid var(--field-border); background: rgba(255,255,255,0.55); border-radius: 9px;
+    padding: 0.45rem 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .12s, background .15s;
+    text-decoration: none; color: inherit; font: inherit; margin: 0;
+  }
+  .partner-chip:visited { color: inherit; }
+  .partner-chip:hover { background: #fff; transform: translateY(-2px); }
+  .partner-chip img { height: 15px; width: auto; display: block; }
+
+  .field { margin-bottom: 0.85rem; }
+  .pill-field {
+    display: flex; align-items: center; gap: 0.6em;
+    background: var(--field-bg); border: 1px solid var(--field-border); border-radius: 999px;
+    padding: 0.15em 0.4em 0.15em 1.1em;
     transition: border-color .15s, box-shadow .15s;
   }
-  input:focus { outline: none; border-color: var(--brand2); box-shadow: 0 0 0 3px rgba(30,33,64,0.1); }
-  .eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none;
-    cursor: pointer; font-size: 16px; color: #888; padding: 6px; }
-  .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; font-size: 13px; }
-  .row label { display: flex; align-items: center; gap: 7px; margin: 0; font-weight: 400; color: #444; cursor: pointer; }
-  .row a { color: var(--brand); text-decoration: none; }
-  .entrar { width: 100%; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; color: #fff;
-    cursor: pointer; background: radial-gradient(circle at 10% 10%, var(--brand), rgba(17,18,36,0.85)); }
-  .entrar:disabled { opacity: .6; cursor: not-allowed; }
-  .erro { color: #c0392b; font-size: 13px; margin-bottom: 14px; min-height: 18px; text-align: center; }
+  .pill-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,45,135,0.16); }
+  .pill-field svg { width: 17px; height: 17px; color: var(--muted); flex: none; }
+  .pill-field input {
+    flex: 1; border: none; background: transparent; outline: none; padding: 0.8em 0.2em;
+    font-family: 'TF Sans', sans-serif; font-size: 0.82rem; color: var(--ink);
+  }
+  .pill-field input::placeholder { color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+  .pill-field .eye { background: none; border: none; cursor: pointer; padding: 0.5em; color: var(--muted); display: flex; }
+  .pill-field .eye svg { width: 17px; height: 17px; }
 
-  @media (max-width: 860px) { .side { display: none; } }
+  .row { display: flex; align-items: center; justify-content: space-between; margin: 1rem 0 1.2rem; font-size: 0.76rem; }
+  .row label { display: flex; align-items: center; gap: 0.5em; color: var(--muted); cursor: pointer; }
+  .row input[type="checkbox"] { accent-color: var(--navy); width: 14px; height: 14px; }
+  .row a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--field-border); text-underline-offset: 2px; }
+
+  .erro { text-align: center; font-size: 0.7rem; color: #c0392b; margin-top: 0.6rem; min-height: 1em; }
+
+  .divider-wrap { width: 1px; background: rgba(43,35,80,0.14); flex: none; }
+
+  /* ---------- Carrossel de marcas, abaixo do card ---------- */
+  .brand-carousel { position: relative; z-index: 1; width: min(92vw, 960px); text-align: center; }
+  .carousel-label {
+    font-family: 'TF Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(43,35,80,0.55); margin-bottom: 0.9rem; text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+  }
+  .carousel-track-wrap {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+  .carousel-track { display: flex; align-items: center; gap: 2.75rem; width: max-content; animation: carouselScroll 28s linear infinite; }
+  @keyframes carouselScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .carousel-logo { height: 24px; width: auto; flex: none; opacity: 0.9; filter: drop-shadow(0 1px 2px rgba(255,255,255,0.5)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+    .carousel-track { animation: none; }
+  }
+
+  @media (max-width: 760px) {
+    body { padding-top: 4.5rem; justify-content: flex-start; }
+    .card { flex-direction: column; min-height: 0; }
+    .divider-wrap { width: auto; height: 1px; }
+    .panel--teaser { text-align: center; align-items: center; padding-bottom: 2.75rem; }
+    .social-row { justify-content: center; }
+    .carousel-track { animation-duration: 18s; gap: 2rem; }
+    .carousel-logo { height: 20px; }
+  }
 </style></head>
 <body>
-  <div class="wrap">
-    <div class="side">
-      <canvas id="particles" class="pcanvas"></canvas>
-      <div class="center">
-        <img class="brand-logo" src="/assets/sanja-smart-logo-white.png" alt="Sanja Smart">
-        <div class="slide" data-slide>
-          <h2>Não somos um chatbot, somos o futuro</h2>
-          <p>Utilize a nossa solução inteligente para transformar a comunicação da sua empresa com atendimento de qualidade e eficiência.</p>
-        </div>
-        <div class="slide" data-slide>
-          <h2>Descubra um futuro de possibilidades</h2>
-          <p>A nossa IA proporciona resultados impressionantes, aumentando a satisfação dos clientes e otimizando o tempo de atendimento.</p>
-        </div>
-        <div class="slide active" data-slide>
-          <h2>O poder de uma IA em suas mãos</h2>
-          <p>Controle o atendimento, o prompt e o CRM em um só painel — com a mesma clareza para toda a equipe.</p>
-        </div>
-        <div class="dots" id="dots"></div>
-      </div>
-      <div class="legal">Este site é regido pelas <a href="/termos.html" target="_blank" rel="noopener">Políticas de Privacidades</a> e pelas <a href="/termos.html" target="_blank" rel="noopener">Termos de Serviços.</a></div>
+
+<div class="stage-bg" aria-hidden="true"></div>
+<img class="techfala-mark" src="/assets/login/techfala-mark.png" alt="TechFala" />
+
+<div class="card">
+  <img class="sanja-mark" src="/assets/login/sanja-mark.png" alt="Sanja Works" />
+  <div class="panel panel--teaser">
+    <h2 class="panel__title">Bem-vindo</h2>
+
+    <div class="social-row">
+      <a href="https://api.whatsapp.com/send/?phone=5512992126931&text=Ol%C3%A1%2C+quero+conhecer+a+TechFala+IA%21&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" title="Falar no WhatsApp" aria-label="Falar no WhatsApp">
+        <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="17" fill="#25D366"/><path d="M17 8.5a8.4 8.4 0 0 0-7.2 12.7L8.5 25.5l4.5-1.2A8.4 8.4 0 1 0 17 8.5Z" fill="#fff"/><path d="M13.8 12.9c.3-.6.5-.6.8-.6h.6c.2 0 .5 0 .7.5l1 2.3c.1.2.1.4 0 .6l-.7 1c-.1.2-.1.3 0 .5.4.8 1.6 2 2.4 2.4.2.1.3.1.5 0l1-.8c.2-.1.4-.1.6 0l2.1 1c.2.1.4.3.4.5-.1 1-1.5 1.8-2.4 1.8-1.9 0-4.6-1.4-6.3-3.5-1.3-1.6-2-3.4-1.7-4.7.1-.5.3-.8.4-1Z" fill="#25D366"/></svg>
+      </a>
+      <a href="https://www.tiktok.com/@techafala.ai?_r=1&_t=ZS-990DF2kW3fw" target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok">
+        <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="17" fill="#111"/><path d="M20 9.5c.4 1.8 1.6 3 3.5 3.2v2.4c-1.2 0-2.4-.4-3.4-1.1v5.1a5 5 0 1 1-5-5c.2 0 .5 0 .7.1v2.5a2.5 2.5 0 1 0 1.8 2.4V9.5H20Z" fill="#fff"/></svg>
+      </a>
+      <a href="https://www.instagram.com/techfala.ai?igsh=MThsdzI2NXE1NXZ4NA==" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
+        <svg viewBox="0 0 34 34"><defs><linearGradient id="ig-teaser" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FEC053"/><stop offset=".5" stop-color="#F2203E"/><stop offset="1" stop-color="#B729A8"/></linearGradient></defs><circle cx="17" cy="17" r="17" fill="url(#ig-teaser)"/><rect x="10.5" y="10.5" width="13" height="13" rx="4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="17" cy="17" r="3.4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="21.3" cy="12.7" r="1" fill="#fff"/></svg>
+      </a>
     </div>
 
-    <div class="panel">
-      <form class="card" onsubmit="entrar(event)">
-        <img class="card-logo" src="/assets/sanja-smart-icon.png" alt="Sanja Smart">
-        <h1>Bem-vindo(a) de volta a Sanja Smart</h1>
-        <div class="sub">Digite as suas credenciais de login para continuar</div>
-
-        <div class="tabs">
-          <button type="button" class="tab on">Login</button>
-        </div>
-
-        <div id="erro" class="erro"></div>
-
-        <div class="field">
-          <label for="email">Endereço de E-mail: *</label>
-          <input id="email" type="email" placeholder="Endereço de E-mail" autocomplete="email" autofocus required>
-        </div>
-
-        <div class="field">
-          <label for="senha">Senha: *</label>
-          <div class="input-wrap">
-            <input id="senha" type="password" placeholder="Senha" autocomplete="current-password" required>
-            <button type="button" class="eye" onclick="verSenha()" title="Mostrar/ocultar senha">👁</button>
-          </div>
-        </div>
-
-        <div class="row">
-          <label><input type="checkbox" id="lembrar"> Mantenha-me conectado</label>
-        </div>
-
-        <button id="btn" class="entrar" type="submit">Entrar</button>
-      </form>
+    <div class="partner-row">
+      <span class="partner-row__label">Faz parte do ecossistema</span>
+      <div class="partner-row__logos">
+        <a href="https://sanjasmart.com.br" target="_blank" rel="noopener noreferrer" class="partner-chip" title="Sanja Smart"><img src="/assets/login/logos/sanjasmart.png" alt="Sanja Smart"></a>
+        <a href="https://lp.techfala.com.br" target="_blank" rel="noopener noreferrer" class="partner-chip" title="TechFala"><img src="/assets/login/logos/techfala.png" alt="TechFala"></a>
+        <button type="button" class="partner-chip" title="abaré"><img src="/assets/login/logos/abare.png" alt="abaré"></button>
+        <a href="https://sanjafree.com.br" target="_blank" rel="noopener noreferrer" class="partner-chip" title="sanjafree"><img src="/assets/login/logos/sanjafree.png" alt="sanjafree"></a>
+      </div>
     </div>
   </div>
 
-  <script>
-    (function () {
-      var slides = document.querySelectorAll('[data-slide]');
-      var dots = document.getElementById('dots');
-      var atual = 2;
-      for (var i = 0; i < slides.length; i++) {
-        (function (idx) {
-          var s = document.createElement('span');
-          if (idx === atual) s.className = 'on';
-          s.onclick = function () { mostrar(idx); };
-          dots.appendChild(s);
-        })(i);
-      }
-      function mostrar(i) {
-        atual = i;
-        for (var k = 0; k < slides.length; k++) slides[k].classList.toggle('active', k === i);
-        var ds = dots.children;
-        for (var j = 0; j < ds.length; j++) ds[j].className = j === i ? 'on' : '';
-      }
-      setInterval(function () { mostrar((atual + 1) % slides.length); }, 5000);
-    })();
+  <div class="divider-wrap"></div>
 
+  <div class="panel panel--form">
+    <h2 class="panel__title">Faça Login</h2>
 
-    (function () {
-      var c = document.getElementById('particles');
-      if (!c) return;
-      var ctx = c.getContext('2d');
-      var w, h, pts;
-      function dims() {
-        var r = c.parentElement.getBoundingClientRect();
-        w = c.width = Math.max(1, Math.floor(r.width));
-        h = c.height = Math.max(1, Math.floor(r.height));
-      }
-      var LINK = 150;
-      function init() {
-        dims();
-        var n = Math.max(70, Math.min(220, Math.floor((w * h) / 6500)));
-        pts = [];
-        for (var i = 0; i < n; i++) {
-          pts.push({
-            x: Math.random() * w, y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
-          });
-        }
-      }
-      function step() {
-        ctx.clearRect(0, 0, w, h);
-        for (var i = 0; i < pts.length; i++) {
-          var p = pts[i];
-          p.x += p.vx; p.y += p.vy;
-          if (p.x < 0 || p.x > w) p.vx *= -1;
-          if (p.y < 0 || p.y > h) p.vy *= -1;
-        }
-        ctx.lineWidth = 1;
-        for (var a = 0; a < pts.length; a++) {
-          for (var b = a + 1; b < pts.length; b++) {
-            var dx = pts[a].x - pts[b].x, dy = pts[a].y - pts[b].y;
-            var d = Math.sqrt(dx * dx + dy * dy);
-            if (d < LINK) {
-              ctx.strokeStyle = 'rgba(255,255,255,' + (0.28 * (1 - d / LINK)) + ')';
-              ctx.beginPath();
-              ctx.moveTo(pts[a].x, pts[a].y);
-              ctx.lineTo(pts[b].x, pts[b].y);
-              ctx.stroke();
-            }
-          }
-        }
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        for (var k = 0; k < pts.length; k++) {
-          ctx.beginPath();
-          ctx.arc(pts[k].x, pts[k].y, 1.7, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        requestAnimationFrame(step);
-      }
-      var t;
-      window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(init, 150); });
-      init();
-      step();
-    })();
+    <form onsubmit="return enviar(event)">
+      <div class="field pill-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+        <input id="email" type="email" placeholder="Usuário" autocomplete="email" autofocus required>
+      </div>
+      <div class="field pill-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input id="senha" type="password" placeholder="••••••" autocomplete="current-password" required>
+        <button type="button" class="eye" onclick="verSenha('senha')" aria-label="Mostrar ou ocultar senha">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+        </button>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="lembrar"> Lembrar</label>
+        <a href="#">Esqueceu senha?</a>
+      </div>
+      <button id="btn-entrar" class="btn btn--solid" type="submit">Entrar</button>
+      <div class="erro" id="erro"></div>
+    </form>
+  </div>
+</div>
 
-    function verSenha() {
-      const i = document.getElementById('senha');
-      i.type = i.type === 'password' ? 'text' : 'password';
-    }
+<div class="brand-carousel" aria-label="Marcas do Grupo Sanja Works">
+  <div class="carousel-label">Grupo Sanja Works</div>
+  <div class="carousel-track-wrap">
+    <div class="carousel-track">
+      <img class="carousel-logo" src="/assets/login/logos/sanjaworks.png" alt="Sanja Works">
+      <img class="carousel-logo" src="/assets/login/logos/techfala.png" alt="TechFala">
+      <img class="carousel-logo" src="/assets/login/logos/abare.png" alt="abaré">
+      <img class="carousel-logo" src="/assets/login/logos/durole.png" alt="DuRole">
+      <img class="carousel-logo" src="/assets/login/logos/exata.png" alt="exata">
+      <img class="carousel-logo" src="/assets/login/logos/sanjafree.png" alt="sanjafree">
+      <img class="carousel-logo" src="/assets/login/logos/sanjasmart.png" alt="Sanja Smart">
 
-    const LS_LOGIN = 'mp_painel_login';
+      <img class="carousel-logo" src="/assets/login/logos/sanjaworks.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/techfala.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/abare.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/durole.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/exata.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/sanjafree.png" alt="" aria-hidden="true">
+      <img class="carousel-logo" src="/assets/login/logos/sanjasmart.png" alt="" aria-hidden="true">
+    </div>
+  </div>
+</div>
 
-    function salvarLoginLocal(email, senha, lembrar) {
-      try {
-        localStorage.setItem(LS_LOGIN, JSON.stringify({
-          email: email,
-          senha: senha,
-          lembrar: !!lembrar,
-        }));
-      } catch (_) {}
-    }
+<script>
+  function verSenha(id) {
+    var i = document.getElementById(id);
+    i.type = i.type === 'password' ? 'text' : 'password';
+  }
 
-    function carregarLoginLocal() {
-      try {
-        const raw = localStorage.getItem(LS_LOGIN);
-        if (!raw) return;
-        const d = JSON.parse(raw);
-        if (d.email) document.getElementById('email').value = d.email;
-        if (d.senha) document.getElementById('senha').value = d.senha;
-        if (d.lembrar) document.getElementById('lembrar').checked = true;
-      } catch (_) {}
-    }
-
-    carregarLoginLocal();
-
-    async function entrar(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn');
-      const erro = document.getElementById('erro');
-      erro.textContent = '';
-      btn.disabled = true;
-      const email = document.getElementById('email').value;
-      const senha = document.getElementById('senha').value;
-      const lembrar = document.getElementById('lembrar').checked;
-      try {
-        const res = await fetch('/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, senha, lembrar }),
-        });
-        if (res.ok) {
-          salvarLoginLocal(email, senha, lembrar);
-          const params = new URLSearchParams(location.search);
-          location.href = params.get('proximo') || '/phone.html?painel=whatsapp';
-        } else {
-          erro.textContent = 'E-mail ou senha incorretos.';
-          btn.disabled = false;
-        }
-      } catch (err) {
-        erro.textContent = 'Erro ao conectar. Tente novamente.';
+  async function enviar(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btn-entrar');
+    var erro = document.getElementById('erro');
+    erro.textContent = '';
+    btn.disabled = true;
+    var email = document.getElementById('email').value;
+    var senha = document.getElementById('senha').value;
+    var lembrar = document.getElementById('lembrar').checked;
+    try {
+      var res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, senha: senha, lembrar: lembrar }),
+      });
+      if (res.ok) {
+        var params = new URLSearchParams(location.search);
+        location.href = params.get('proximo') || '/phone.html?painel=whatsapp';
+      } else {
+        erro.textContent = 'E-mail ou senha incorretos.';
         btn.disabled = false;
       }
+    } catch (err) {
+      erro.textContent = 'Erro ao conectar. Tente novamente.';
+      btn.disabled = false;
     }
-  </script>
+    return false;
+  }
+</script>
 </body></html>`;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const ORIGENS_CORS = new Set([
   config.publicUrl,
   config.publicUrl.replace(/^https:/, 'http:'),
@@ -310,6 +351,9 @@ export async function criarServidor() {
   const app = Fastify({ logger: true, bodyLimit: 26 * 1024 * 1024 });
 
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body: string, done) => {
+    if (req.url?.startsWith('/webhook/')) {
+      (req as { rawBody?: string }).rawBody = body;
+    }
     if (!body || body.trim() === '') {
       done(null, {});
     } else {
@@ -469,6 +513,7 @@ export async function criarServidor() {
   await app.register(rotasCampanhas);
   await app.register(rotasMidiasGatilho);
   await app.register(rotasPromptTools);
+  await app.register(rotasMensagensApi);
   await garantirMidiasExemplo().catch((err) =>
     console.warn('[midias-gatilho] seed:', err),
   );

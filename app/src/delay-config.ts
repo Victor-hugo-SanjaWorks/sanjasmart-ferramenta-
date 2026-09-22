@@ -5,8 +5,8 @@
  */
 import pg from 'pg';
 import { config } from './config.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export interface ConfigDelay {
   delay_min_seg: number;

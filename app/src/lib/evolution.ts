@@ -4,6 +4,7 @@
 import { config } from '../config.js';
 import { dividirResposta, normalizarRespostaWhatsapp } from './mensagem.js';
 import { obterDelayAleatorioMs } from '../delay-config.js';
+import { resolverNumeroEvolution } from './wa-jid.js';
 
 function aguardar(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -161,7 +162,10 @@ export async function enviarTextoSimples(
   telefone: string,
   texto: string,
   delayMs = 1200,
+  remoteJid?: string | null,
 ): Promise<void> {
+  const number = await resolverNumeroEvolution(telefone, remoteJid, instance);
+  console.log(`[evolution] sendText ${instance} -> ${number}`);
   const res = await fetch(`${config.evolutionUrl}/message/sendText/${instance}`, {
     method: 'POST',
     headers: {
@@ -169,14 +173,107 @@ export async function enviarTextoSimples(
       apikey: config.evolutionApiKey,
     },
     body: JSON.stringify({
-      number: telefone,
+      number,
       text: texto,
-      delay: delayMs,
+      delay: 0,
     }),
   });
   if (!res.ok) {
     const txt = await res.text();
     throw new Error(`Evolution erro ${res.status}: ${txt}`);
+  }
+}
+
+export async function marcarMensagensLidas(
+  instance: string,
+  remoteJid: string,
+  ids: string[],
+): Promise<void> {
+  const jid = remoteJid.trim();
+  if (!jid || !ids.length) return;
+  const corpo = {
+    readMessages: ids.filter(Boolean).map((id) => ({
+      id,
+      fromMe: false,
+      remoteJid: jid,
+    })),
+  };
+  try {
+    const res = await fetch(`${config.evolutionUrl}/chat/markMessageAsRead/${instance}`, {
+      method: 'POST',
+      headers: headersEvolution(),
+      body: JSON.stringify(corpo),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) {
+      console.warn(`[evolution] markAsRead ${res.status} ${await res.text().catch(() => '')}`);
+    }
+  } catch (err) {
+    console.warn('[evolution] markAsRead:', err instanceof Error ? err.message : err);
+  }
+}
+
+export async function enviarPresenca(
+  instance: string,
+  number: string,
+  presence: 'available' | 'composing' | 'paused' = 'available',
+  delayMs = 0,
+): Promise<void> {
+  if (!number) return;
+  const destino = number.includes('@') ? number : number.replace(/\D/g, '');
+  const timeout = Math.max(10_000, delayMs + 6_000);
+  const formatos: Record<string, unknown>[] = [
+    { number: destino, delay: delayMs, presence },
+    { number: destino, options: { delay: delayMs, presence } },
+  ];
+  for (const body of formatos) {
+    try {
+      const res = await fetch(`${config.evolutionUrl}/chat/sendPresence/${instance}`, {
+        method: 'POST',
+        headers: headersEvolution(),
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(timeout),
+      });
+      if (res.ok) return;
+      console.warn(`[evolution] sendPresence ${res.status} ${await res.text().catch(() => '')}`);
+    } catch (err) {
+      console.warn('[evolution] sendPresence:', err instanceof Error ? err.message : err);
+    }
+  }
+}
+
+/** Tempo visível de "digitando..." — uma vez por resposta, não por fragmento. */
+export function delayDigitandoMs(texto: string): number {
+  const n = String(texto || '').length;
+  return Math.min(3200, Math.max(1400, 900 + n * 18));
+}
+
+export async function habilitarLeituraAutomatica(instance: string): Promise<void> {
+  try {
+    const atualRes = await fetch(`${config.evolutionUrl}/settings/find/${instance}`, {
+      headers: headersEvolution(),
+      signal: AbortSignal.timeout(8000),
+    });
+    const atual = atualRes.ok ? await atualRes.json() as Record<string, unknown> : {};
+    const body = {
+      ...atual,
+      alwaysOnline: true,
+      readMessages: true,
+      readStatus: true,
+    };
+    const res = await fetch(`${config.evolutionUrl}/settings/set/${instance}`, {
+      method: 'POST',
+      headers: headersEvolution(),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) {
+      console.warn(`[evolution] settings/set ${res.status} ${await res.text().catch(() => '')}`);
+      return;
+    }
+    console.log('[evolution] leitura automatica e alwaysOnline ligados');
+  } catch (err) {
+    console.warn('[evolution] settings:', err instanceof Error ? err.message : err);
   }
 }
 

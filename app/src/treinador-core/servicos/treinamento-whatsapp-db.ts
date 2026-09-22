@@ -1,3 +1,5 @@
+export { pool as poolWhatsappTreinador } from '../../pg-pool.js';
+import { pool as poolWhatsappTreinador } from '../../pg-pool.js';
 /**
  * Pool Postgres e DDL compartilhados do treinamento WhatsApp.
  * Centraliza tabelas de telefones, aprendizados e pendencias.
@@ -6,7 +8,6 @@
 import pg from 'pg';
 import { config } from '../../config.js';
 
-export const poolWhatsappTreinador = new pg.Pool({ connectionString: config.databaseUrl });
 
 export function paraBoolean(valor: unknown): boolean {
   return valor === true || valor === 'true' || valor === 1;

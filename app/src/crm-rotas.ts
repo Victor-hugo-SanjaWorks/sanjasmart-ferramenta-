@@ -60,6 +60,7 @@ import {
 } from './crm-assignee-normalize.js';
 import { definirPausa } from './pausa-minasplaca.js';
 import { listarUsuarios } from './usuarios-store.js';
+import { pool as poolCrm } from './pg-pool.js'
 
 async function exigirAuth(req: FastifyRequest, reply: FastifyReply) {
   const u = await obterUsuarioDaSessao(req);
@@ -89,7 +90,6 @@ function erroContato(reply: FastifyReply, err: unknown) {
   throw err;
 }
 
-const poolCrm = new pg.Pool({ connectionString: config.databaseUrl });
 
 export async function rotasCrm(app: FastifyInstance): Promise<void> {
   app.get('/api/crm/board', async (req, reply) => {
@@ -223,9 +223,7 @@ export async function rotasCrm(app: FastifyInstance): Promise<void> {
         erro: 'Informe o telefone do contato.',
       });
     }
-    const { whatsappConectadoParaIa } = await import('./pausa-minasplaca.js');
-    const waOk = await whatsappConectadoParaIa();
-    const iaAtiva = waOk && body.iaAtiva !== false;
+    const iaAtiva = body.iaAtiva !== false;
     try {
       let contato = await criarContato({
         colunaId: body.colunaId,
@@ -236,15 +234,10 @@ export async function rotasCrm(app: FastifyInstance): Promise<void> {
         automacaoAtiva: iaAtiva,
       });
 
-      if (iaAtiva && contato.telefone) {
-        await definirPausa(contato.telefone, false, {
+      if (contato.telefone) {
+        await definirPausa(contato.telefone, !iaAtiva, {
           origem: 'crm',
-          motivo: 'Contato criado com IA ativa',
-        }).catch(() => {});
-      } else if (contato.telefone) {
-        await definirPausa(contato.telefone, true, {
-          origem: 'crm',
-          motivo: waOk ? 'Contato criado com IA pausada' : 'WhatsApp desconectado',
+          motivo: iaAtiva ? 'Contato criado com IA ativa' : 'Contato criado com IA pausada',
         }).catch(() => {});
       }
 
@@ -269,16 +262,6 @@ export async function rotasCrm(app: FastifyInstance): Promise<void> {
     try {
       const antes = await obterContato(id);
       if (!antes) return reply.code(404).send({ ok: false, erro: 'Contato nao encontrado' });
-
-      if (body.automacaoAtiva === true) {
-        const { whatsappConectadoParaIa } = await import('./pausa-minasplaca.js');
-        if (!(await whatsappConectadoParaIa())) {
-          return reply.code(409).send({
-            ok: false,
-            erro: 'WhatsApp desconectado — a IA não pode ficar ativa',
-          });
-        }
-      }
 
       // Normaliza responsável (id do painel e/ou nome) antes de persistir
       const mudouResponsavel = patchTemResponsavel(body);

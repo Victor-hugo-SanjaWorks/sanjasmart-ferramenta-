@@ -22,8 +22,8 @@ import {
   textoRegrasCalendarioTools,
 } from './agente-tools-calendario.js';
 import { textoAgendasSystemPrompt } from './calendario-servico-ia.js';
+import { pool as dbPool } from './pg-pool.js'
 
-const dbPool = new pg.Pool({ connectionString: config.databaseUrl });
 
 interface OpcoesResposta {
   telefone: string;
@@ -225,10 +225,17 @@ Use o URL da imagem do histórico como o parâmetro link_logo.`,
   ...TOOLS_CALENDARIO,
 ];
 
-/** Tilit: sem calculadora Minas nem VhSys. */
+/** Sanja Smart: só transferência, ficha e pedido de ajuda. Sem cálculo, frete, layout ou calendário. */
+const TOOLS_PERMITIDAS = new Set([
+  'transferir_departamento',
+  'transferir_humano',
+  'transferir_atendente',
+  'pedir_ajuda_humana',
+  'atualizar_dados_cliente',
+]);
 const DEFINICAO_TOOLS_ATIVAS = DEFINICAO_TOOLS.filter((t) => {
   const nome = (t as { function?: { name?: string } }).function?.name;
-  return nome !== 'calcular_orcamento' && nome !== 'verificar_cliente';
+  return !!nome && TOOLS_PERMITIDAS.has(nome);
 });
 
 export async function gerarRespostaAgente(opts: OpcoesResposta): Promise<string> {
@@ -259,141 +266,32 @@ export async function gerarRespostaAgente(opts: OpcoesResposta): Promise<string>
     estadoTexto += `=========================================\n\n`;
   }
 
-  const contexto = await buscarContexto(mensagem);
-  const contextoTexto = contexto.length
-    ? `Contexto relevante:\n${contexto.map((c) => `- ${c}`).join('\n')}\n\n`
-    : '';
+  const contextoTexto = '';
 
-  // ALERTA DE FLUXO CRÍTICO (APLICAÇÃO PATRIMONIAL DETECTADA)
-  const historicoTextoCompleto = (historico.map(h => h.content).join(' ') + ' ' + mensagem).toLowerCase();
-  
-  let ePatrimonial = historicoTextoCompleto.includes('patrimon') || 
-                     historicoTextoCompleto.includes('tombamento') || 
-                     historicoTextoCompleto.includes('bens') || 
-                     historicoTextoCompleto.includes('máquina') || 
-                     historicoTextoCompleto.includes('ativo') || 
-                     historicoTextoCompleto.includes('equipamento');
-                     
-  let temLayoutNoHistorico = historicoTextoCompleto.includes('simulacao-placa.pdf') || 
-                             historicoTextoCompleto.includes('gerar_preview_patrimonial') || 
-                             historicoTextoCompleto.includes('layout da sua placa');
+  const turnosUser = historico.filter((h) => h.role === 'user').length + 1;
+  const avisoTurno =
+    turnosUser >= 5
+      ? `⚠️ TURNO ${turnosUser}/6. Encerre: se a coleta mínima já existe, chame transferir_departamento departamento="comercial" AGORA. Se falta 1 dado, pergunte UMA vez e no próximo turno transfira.\n\n`
+      : '';
 
-  // Faz uma busca profunda no banco de dados para evitar perdas devido ao limite de fatiamento do histórico (slice),
-  // limitando a busca à sessão ativa (mensagens das últimas 24 horas e após a última transferência de atendimento).
-  try {
-    // 1. Localiza a última transferência nas últimas 24 horas
-    const resUltimaTransf = await dbPool.query(
-      `SELECT COALESCE(MAX(timestamp), '1970-01-01 00:00:00+00'::timestamptz) AS ultima_transferencia 
-       FROM historico_conversa 
-       WHERE telefone = $1 
-         AND timestamp >= NOW() - INTERVAL '24 hours'
-         AND (content ILIKE '%Transferindo%' OR content ILIKE '%TRANSFERIR%')`,
-      [telefone]
-    );
-    const ultimaTransferencia = resUltimaTransf.rows[0]?.ultima_transferencia || '1970-01-01 00:00:00+00';
+  const system = `${avisoTurno}${estadoTexto}${promptBase}
 
-    // 2. Verifica se houve menção a patrimonial na sessão ativa
-    const resPatrimonial = await dbPool.query(
-      `SELECT EXISTS (
-        SELECT 1 FROM historico_conversa 
-        WHERE telefone = $1 
-          AND timestamp >= NOW() - INTERVAL '24 hours'
-          AND timestamp > $2
-          AND (
-            content ILIKE '%patrimon%' 
-            OR content ILIKE '%tombamento%' 
-            OR content ILIKE '%bens%' 
-            OR content ILIKE '%máquina%' 
-            OR content ILIKE '%ativo%' 
-            OR content ILIKE '%equipamento%'
-          )
-      ) AS e_patrimonial`,
-      [telefone, ultimaTransferencia]
-    );
-    if (resPatrimonial.rows[0]?.e_patrimonial === true) {
-      ePatrimonial = true;
-    }
-
-    // 3. Verifica se o layout foi gerado na sessão ativa
-    const resLayout = await dbPool.query(
-      `SELECT EXISTS (
-        SELECT 1 FROM historico_conversa 
-        WHERE telefone = $1 
-          AND timestamp >= NOW() - INTERVAL '24 hours'
-          AND timestamp > $2
-          AND (
-            content ILIKE '%simulacao-placa.pdf%' 
-            OR content ILIKE '%gerar_preview_patrimonial%' 
-            OR content ILIKE '%layout da sua placa%'
-          )
-      ) AS tem_layout`,
-      [telefone, ultimaTransferencia]
-    );
-    if (resLayout.rows[0]?.tem_layout === true) {
-      temLayoutNoHistorico = true;
-    }
-  } catch (err) {
-    console.error('[agente] Erro ao consultar histórico da sessão ativa no banco:', err);
-  }
-
-  let warningPrompt = '';
-  if (ePatrimonial && !temLayoutNoHistorico) {
-    warningPrompt = `⚠️ ALERTA DE FLUXO CRÍTICO (APLICAÇÃO PATRIMONIAL DETECTADA):
-- O cliente informou que a aplicação das placas é PATRIMONIAL ou similar.
-- O layout/preview ainda NÃO foi gerado ou enviado.
-- É ESTRITAMENTE PROIBIDO enviar o resumo final da cotação (com o formato 🛒 RESUMO DA COTAÇÃO, #carrinho_compras#, etc.) ou se despedir/transferir o cliente, A MENOS que o cliente tenha explicitamente recusado a simulação de layout.
-- Se o cliente escolheu a modalidade de frete (PAC/SEDEX), você DEVE obrigatoriamente fazer a pergunta do layout agora:
-  "O frete via [Modalidade Escolhida] ficou em R$ [Valor]. Como o seu uso é patrimonial, gostaria de ver uma simulação/layout de como ficaria a sua placa com o seu logotipo antes de fecharmos?"
-- Se o cliente já aceitou fazer o layout (ex: "quero fazer layout"), continue coletando os dados do layout (furos, código de barras, QR code e imagem do logotipo). NÃO envie o resumo final!
-- Só envie o resumo final após a aprovação do layout/preview gerado pela ferramenta.
-
-=========================================\n\n`;
-  }
-
-  const system = `${warningPrompt}${estadoTexto}${promptBase}\n\n${contextoTexto}
-REGRA ABSOLUTA SOBRE CÁLCULO DE PREÇOS (PRIORIDADE MÁXIMA):
-- É COMPLETAMENTE PROIBIDO calcular, estimar ou inventar qualquer preço.
-- Você NÃO possui permissão para fazer matemática com valores das tabelas.
-- SEMPRE que tiver material + tamanho + quantidade confirmados, chame a ferramenta calcular_orcamento.
-- A ferramenta retornará o carrinho formatado pronto para enviar ao cliente.
-- Se o cliente pedir um produto mas ainda faltar algum dos 3 dados, continue a conversa para coletá-lo — um dado por vez.
-
-REGRA DE MENSAGENS PROATIVAS (PRIORIDADE ALTA):
-- O histórico pode incluir mensagens automáticas que o sistema enviou antes do cliente responder (lembrete de boleto, rastreio, cobrança, pós-venda).
-- Se o cliente responder "obrigado", "ok", "bom dia" ou similar logo após uma mensagem proativa, interprete no contexto do que foi enviado — NÃO trate como conversa nova/genérica.
-- Exemplo: após lembrete de boleto, "obrigado" = confirmação educada; responda de forma breve e contextual (ex: disponível para dúvidas sobre o pagamento).
-
-REGRA DE GERENCIAMENTO DE ESTADO (PRIORIDADE MÁXIMA):
-- Você possui acesso à ferramenta 'atualizar_dados_cliente'.
-- Sempre que o cliente fornecer ou confirmar novos dados (como nome, CPF/CNPJ, CEP, itens de compra, opções de layout ou aprovação do layout), chame IMEDIATAMENTE a ferramenta 'atualizar_dados_cliente' para manter a ficha cadastral do cliente atualizada no banco.
-- NÃO tente adivinhar ou inventar dados; grave apenas dados confirmados e reais.
-- O histórico de mensagens está resumido em apenas 15 mensagens mais recentes. Para se localizar sobre o que o cliente deseja e onde a conversa parou, use a 'FICHA CADASTRAL E ESTADO ATUAL DO CLIENTE' fornecida acima.
-
-REGRA DE FRETE (PRIORIDADE MÁXIMA):
-- Sempre que o cliente pedir o frete, pergunte o CEP (se ele ainda não tiver passado).
-- Quando o cliente fornecer o CEP, você DEVE acionar a ferramenta calcular_frete IMEDIATAMENTE para buscar os valores reais dos Correios. NÃO invente valores de frete!
-
-REGRA CRÍTICA DE LOGOTIPO E LAYOUT (PRIORIDADE MÁXIMA):
-- Se o cliente declarou na conversa que a aplicação é PATRIMONIAL (ou controle de bens, tombamento, identificação de máquinas/ativos/equipamentos), você é OBRIGADO a seguir a "🛑 REGRA CRÍTICA DO LOGOTIPO / PREVIEW" do prompt:
-  1. Primeiro pergunte se ele quer ver o layout: "Gostaria de ver uma simulação/layout de como ficaria a sua placa com o seu logotipo antes de fecharmos?"
-  2. Se sim, faça as 3 perguntas (furos, código de barras, QR Code) e aguarde a resposta.
-  3. Depois peça o logotipo e aguarde a imagem chegar ([Imagem: URL] ou [Arquivo: URL]).
-  4. Só então gere a simulação com a ferramenta 'gerar_preview_patrimonial'.
-- É ESTRITAMENTE PROIBIDO enviar o resumo final ou falar de transferência para consultores sem passar por essa jornada de layout se a aplicação for patrimonial!
+REGRA ABSOLUTA (Sanja Smart):
+- Fale SÓ com o que está no prompt acima. Nada de RAG, nada de conhecimento geral, nada de inventar.
+- É PROIBIDO calcular, estimar, somar, converter m², preço, parcela, home equity em reais ou "o que cabe no terreno".
+- Não existem as tools calcular_orcamento, calcular_frete, gerar_preview_patrimonial. Nunca fale de placa patrimonial, Correios ou Minas Placa.
+- 6 interações no máximo. Siga o roteiro curto do prompt.
+- Pediu humano / você não sabe / tema perigoso → pedir_ajuda_humana + transferir_departamento.
+- No fecho (coleta mínima ou 6º turno) → transferir_departamento departamento="comercial".
+- atualizar_dados_cliente só com dados que a pessoa confirmou.
 
 DIRETRIZES DE FORMATO (WhatsApp):
-1. Brevidade: máximo 2 a 3 parágrafos curtos por mensagem.
-2. Uma pergunta por vez no final da mensagem.
-3. Tópicos com emojis discretos (📍, 💰, 📦, 👉) para listas.
-4. Tom humano e consultivo.
+1. Máximo 2 a 3 parágrafos curtos.
+2. Uma pergunta por vez.
+3. Tom humano. Sem soar robô.
 
 ${await textoRegrasTransferencia()}
-
-${textoRegrasCalendarioTools()}
-
-${await textoAgendasSystemPrompt()}
 `.trim();
-
 
   const user = mensagem;
 
@@ -431,7 +329,7 @@ ${await textoAgendasSystemPrompt()}
           tools: DEFINICAO_TOOLS_ATIVAS,
           tool_choice: 'auto',
           max_tokens: 4000,
-          temperature: 0.3
+          temperature: 0.15
         }),
       });
 
@@ -446,7 +344,7 @@ ${await textoAgendasSystemPrompt()}
       // Se não há tool_calls, é uma resposta de texto final — retorna
       if (!message?.tool_calls || message.tool_calls.length === 0) {
         const respostaFinal = message?.content?.trim() ?? '';
-        return respostaFinal || 'Oi! Sou a assistente da Tilit. Como posso te ajudar?';
+        return respostaFinal || 'Olá! Aqui é o San, da Sanja Smart. Como posso te ajudar?';
       }
 
       // Há tool_calls — processa cada uma
@@ -810,7 +708,8 @@ ${await textoAgendasSystemPrompt()}
         else if (
           toolName === 'transferir_departamento' ||
           toolName === 'transferir_humano' ||
-          toolName === 'transferir_atendente'
+          toolName === 'transferir_atendente' ||
+          toolName === 'pedir_ajuda_humana'
         ) {
           try {
             const { executarToolTransferencia } = await import('./agente-exec-transfer.js');

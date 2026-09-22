@@ -77,6 +77,7 @@ async function buscarContatoId(telefone: string): Promise<number | null> {
   for (const q of qs) {
     if (!q) continue;
     const r = await chatwootFetch(accountPath(`/contacts/search?q=${encodeURIComponent(q)}`));
+    if (r.status === 429) break;
     if (!r.ok) continue;
     const data = (await r.json()) as { payload?: Array<{ id?: number; phone_number?: string }> };
     const lista = data.payload ?? [];

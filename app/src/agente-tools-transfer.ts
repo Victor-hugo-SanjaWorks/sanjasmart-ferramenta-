@@ -58,6 +58,21 @@ Respeite as regras "quando transferir" de cada fila (injetadas no system).`,
       },
     },
   },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'pedir_ajuda_humana',
+      description:
+        'Notifica o time humano no WhatsApp. Use quando o cliente pediu humano, você não sabe responder, ou a resposta seria perigosa/fora do roteiro. Sempre chame também transferir_departamento na mesma rodada.',
+      parameters: {
+        type: 'object',
+        properties: {
+          motivo: { type: 'string', description: 'Por que precisa de um humano agora.' },
+        },
+        required: ['motivo'],
+      },
+    },
+  },
 ];
 
 export async function textoRegrasTransferencia(): Promise<string> {
@@ -79,11 +94,13 @@ export async function textoRegrasTransferencia(): Promise<string> {
     /* filas indisponíveis — segue regra base */
   }
 
-  return `REGRA DE TRANSFERÊNCIA:
-- Setor → transferir_departamento (alias transferir_humano).
-- Pessoa → transferir_atendente com nome_ou_email.
+  return `REGRA DE TRANSFERÊNCIA (Sanja Smart):
+- Venda / orçamento / visita / simulação / preço → transferir_departamento departamento="comercial".
+- Pediu humano, você não sabe, ou o tema é perigoso/fora do prompt → pedir_ajuda_humana E transferir_departamento.
+- Pessoa específica → transferir_atendente (não cite o nome ao cliente).
 - Departamentos: ${NOMES_DEPARTAMENTOS.join(', ')}.
-- Após tool: frase acolhedora; NÃO cite nomes; NÃO continue o assunto do setor.
-- FINANCEIRO: boleto/fatura/pagamento/cobrança/NF → transferir_departamento departamento="financeiro".
+- Após a tool: frase curta; NÃO cite nomes; NÃO continue vendendo sozinha.
+- NÃO calcule nada. NÃO invente valor, prazo extra ou o que cabe no terreno.
+- Prefira fechar em no máximo 6 turnos, seguindo o roteiro do prompt.
 ${blocosFila}`;
 }

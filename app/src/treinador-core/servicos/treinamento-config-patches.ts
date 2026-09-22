@@ -29,8 +29,8 @@ import { reindexarCatalogoTreinadorForcado } from './treinamento-config-vetorial
 import { dispararAlertaRegressaoAposApply } from './treinamento-alerta-regressao.js';
 import { registrarAuditAsync } from './treinamento-audit-log.js';
 import { invalidarCacheCatalogo } from './treinamento-catalogo-cache.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export interface PatchConfiguracaoPendente {
   id: number;

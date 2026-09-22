@@ -27,5 +27,5 @@ export function normalizarRespostaWhatsapp(texto: string): string {
 }
 
 export function jidEhGrupoOuLista(jid: string): boolean {
-  return jid.includes('@g.us') || jid.includes('@broadcast') || jid.endsWith('@lid');
+  return jid.includes('@g.us') || jid.includes('@broadcast') || jid.includes('@newsletter');
 }

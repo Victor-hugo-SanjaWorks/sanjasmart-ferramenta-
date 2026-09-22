@@ -11,9 +11,9 @@ import { obterHistorico, adicionarAoHistorico } from './historico-minasplaca.js'
 import { logEvento } from './util/log-eventos.js';
 import { iaEstaPausada } from './pausa-minasplaca.js';
 import { obterConfigFollowup } from './followup-config.js';
+import { pool } from './pg-pool.js';
 
 const redis = obterRedis();
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 const PREFIXO_TIMER = 'followup:timer:';
 const PREFIXO_SENT = 'followup:sent:';
@@ -171,9 +171,7 @@ export async function processarFollowup(telefone: string): Promise<void> {
     ]);
 
     console.log(`[followup] enviando para ${telefone}: ${resposta.slice(0, 80)}`);
-    const remoteJid = `${telefone}@s.whatsapp.net`;
     const resultado = await tentarEnviarResposta(telefone, resposta, config.evolutionInstance, {
-      remoteJid,
       fragmentar: true,
     });
     console.log(`[followup] resultado envio para ${telefone}:`, resultado);

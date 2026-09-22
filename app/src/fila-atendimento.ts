@@ -5,8 +5,9 @@
 import pg from 'pg';
 import { config } from './config.js';
 import { chatwootFetch } from './chatwoot-sync.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+
 const CHAVE = 'fila_atendimento_habilitada';
 
 export type MembroFila = {

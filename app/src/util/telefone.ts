@@ -17,23 +17,20 @@ export function canonizarTelefoneBr(valor: string): string {
   let d = normalizarTelefone(valor);
   if (!d) return d;
 
-  if (d.startsWith('55') && d.length === 13) {
+  if (d.startsWith('55') && d.length === 12) {
     const ddd = d.slice(2, 4);
     const local = d.slice(4);
     if (local.length === 8 && /^[6-9]/.test(local)) {
       d = `55${ddd}9${local}`;
     }
-  }
-
-  if (!d.startsWith('55') && d.length >= 10 && d.length <= 11) {
-    d = `55${d}`;
-    if (d.length === 13) {
-      const ddd = d.slice(2, 4);
-      const local = d.slice(4);
-      if (local.length === 8 && /^[6-9]/.test(local)) {
-        d = `55${ddd}9${local}`;
-      }
+  } else if (!d.startsWith('55') && d.length === 10) {
+    const ddd = d.slice(0, 2);
+    const local = d.slice(2);
+    if (local.length === 8 && /^[6-9]/.test(local)) {
+      d = `55${ddd}9${local}`;
     }
+  } else if (!d.startsWith('55') && d.length === 11) {
+    d = `55${d}`;
   }
 
   return d;
@@ -47,13 +44,9 @@ export function variantesTelefoneBr(valor: string): string[] {
   if (base) set.add(base);
   if (canon) set.add(canon);
 
-  if (canon.startsWith('55') && canon.length === 14) {
+  if (canon.startsWith('55') && canon.length === 13) {
     const semNove = canon.slice(0, 4) + canon.slice(5);
     set.add(semNove);
-  }
-  if (base.startsWith('55') && base.length === 13) {
-    const comNove = canonizarTelefoneBr(base);
-    if (comNove) set.add(comNove);
   }
 
   return [...set].filter(Boolean);
@@ -75,6 +68,42 @@ export function telefoneParaJid(telefone: string): string {
 export function jidEhGrupoOuLista(remoteJid: string | undefined | null): boolean {
   const jid = String(remoteJid ?? '').toLowerCase().trim();
   return jid.endsWith('@g.us') || jid.endsWith('@broadcast') || jid.includes('@newsletter');
+}
+
+export function jidEhLid(jid: string | undefined | null): boolean {
+  return String(jid ?? '').toLowerCase().includes('@lid');
+}
+
+/** JID real para envio (LID do WhatsApp atual) — não reconstruir @s.whatsapp.net. */
+export function jidParaEnvio(remoteJid: string | undefined | null): string {
+  const jid = String(remoteJid ?? '').trim();
+  if (!jid) return '';
+  if (jidEhLid(jid) || jid.includes('@s.whatsapp.net') || jid.includes('@g.us')) {
+    return jid.split(':')[0];
+  }
+  return jid;
+}
+
+/** JID de envio: LID ganha de @s.whatsapp.net. */
+export function jidEnvioPreferindoLid(key: {
+  remoteJid?: string;
+  remoteJidAlt?: string;
+} | undefined | null): string {
+  const a = jidParaEnvio(key?.remoteJid);
+  const b = jidParaEnvio(key?.remoteJidAlt);
+  if (jidEhLid(a)) return a;
+  if (jidEhLid(b)) return b;
+  return a || b;
+}
+export function telefoneDeChaveWhatsapp(key: {
+  remoteJid?: string;
+  remoteJidAlt?: string;
+} | undefined | null): string {
+  const jid = String(key?.remoteJid ?? '');
+  const alt = String(key?.remoteJidAlt ?? '');
+  if (alt.includes('@s.whatsapp.net')) return jidParaTelefone(alt);
+  if (jid.includes('@s.whatsapp.net')) return jidParaTelefone(jid);
+  return jidParaTelefone(jid || alt);
 }
 
 /** Telefone a partir de remoteJid */

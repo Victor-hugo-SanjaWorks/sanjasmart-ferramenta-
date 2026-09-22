@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { config } from './config.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { pool } from './pg-pool.js';
 import {
   htmlEditorParaTexto,
   markupParaLlm,
@@ -13,7 +14,6 @@ import {
   textoParaHtmlEditor,
 } from './prompt-markup.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 const PROMPT_PADRAO = ``;
 
@@ -137,9 +137,15 @@ export async function inicializarBancoPrompt(): Promise<void> {
     ]);
   }
 
-  // Sem isso, o primeiro save nao teria um "antes" para onde voltar.
   const atual = await obterPromptCompleto();
-  if (atual.texto) await registrarVersaoPrompt(atual.texto, atual.html, 'boot').catch(() => {});
+  const arquivoEhSam = /Sanja Smart/i.test(promptInicial) && /Aqui é o San/i.test(promptInicial);
+  const bancoEhSam = /Aqui é o San, da Sanja Smart/i.test(atual.texto || '');
+  if (arquivoEhSam && !bancoEhSam) {
+    console.log('[prompt] Substituindo prompt residual pelo roteiro San / Sanja Smart');
+    await salvarPrompt(promptInicial, textoParaHtmlEditor(promptInicial), 'boot-sanjasmart');
+  } else if (atual.texto) {
+    await registrarVersaoPrompt(atual.texto, atual.html, 'boot').catch(() => {});
+  }
 }
 
 /** Texto limpo usado no system do agente (sem marcadores de seção). */

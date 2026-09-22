@@ -2,8 +2,9 @@ import pg from 'pg';
 import { config } from './config.js';
 import { obterPromptCompleto, salvarPrompt } from './prompt-minasplaca.js';
 import { listarSecoesMarkup, temMarcadoresSecao } from './prompt-markup.js';
+import { pool } from './pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
+
 const BLOCO_LIVRE = 'PROMPT LIVRE';
 
 export type OperacaoTreinador = 'replace_trecho' | 'append_bloco' | 'prepend_bloco';

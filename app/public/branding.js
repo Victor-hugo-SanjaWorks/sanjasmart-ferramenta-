@@ -59,7 +59,11 @@
         img.src = absUrl(logo);
         img.alt = nome;
       } else {
-        /* sem logo: mantem oculto (white-label), so o nome no texto */
+        wrap.hidden = true;
+        wrap.title = nome;
+        img.removeAttribute('src');
+        img.alt = '';
+        img.style.display = 'none';
       }
     }
 

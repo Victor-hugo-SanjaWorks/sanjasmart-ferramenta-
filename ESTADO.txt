@@ -1,0 +1,14 @@
+FONTE neste servidor (.195). APP VIVO no infra-ia-2.
+
+Pasta: código, .env mestre, prompt, dados.
+Processo que o cliente acessa: container sanjasmart_app no infra-ia-2.
+Traefik daqui (ia2_front_proxy) encaminha a URL pública para lá.
+
+NÃO dê `docker compose up` / `docker start sanjasmart_app` daqui
+salvo rollback explícito. Sobe um clone fantasma (RAM + confusão).
+
+Deploy:  python3 /root/infra/migrar-app-ia2.py sanjasmart
+Rollback: docker start sanjasmart_app
+          (o container antigo ainda tem labels Traefik)
+
+Mapa: /root/infra/MAPA-FROTA.md

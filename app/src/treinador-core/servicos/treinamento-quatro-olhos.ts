@@ -9,8 +9,8 @@ import { telefoneSeguro } from './treinamento-config-patch-utils.js';
 import { eReplaceTotalPromptSistema } from './treinamento-confirmacao.js';
 import type { PatchTreinamentoAplicavel } from './treinamento-config-alvos.js';
 import type { PreviewPatchTreinamento } from './treinamento-config-lote.js';
+import { pool } from '../../pg-pool.js';
 
-const pool = new pg.Pool({ connectionString: config.databaseUrl });
 
 export function quatroOlhosAtivo(): boolean {
   const v = String(process.env.TREINADOR_QUATRO_OLHOS || '').trim().toLowerCase();
