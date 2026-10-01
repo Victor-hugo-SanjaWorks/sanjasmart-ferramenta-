@@ -6,9 +6,31 @@ import type { Contato } from '@/shared/types/crm'
 
 export const PAGE_SIZE = 25
 
-export function parseValor(raw?: string): number {
-  if (!raw) return 0
-  const n = Number(String(raw).replace(/[^\d,.-]/g, '').replace(',', '.'))
+export function parseValor(raw?: string | number): number {
+  if (raw === undefined || raw === null || raw === '') return 0
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : 0
+  const str = String(raw).trim()
+  if (!str) return 0
+
+  const cleaned = str.replace(/[^\d,.-]/g, '')
+  if (!cleaned) return 0
+
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+      const n = Number(cleaned.replace(/\./g, '').replace(',', '.'))
+      return Number.isFinite(n) ? n : 0
+    } else {
+      const n = Number(cleaned.replace(/,/g, ''))
+      return Number.isFinite(n) ? n : 0
+    }
+  }
+
+  if (cleaned.includes(',')) {
+    const n = Number(cleaned.replace(',', '.'))
+    return Number.isFinite(n) ? n : 0
+  }
+
+  const n = Number(cleaned)
   return Number.isFinite(n) ? n : 0
 }
 

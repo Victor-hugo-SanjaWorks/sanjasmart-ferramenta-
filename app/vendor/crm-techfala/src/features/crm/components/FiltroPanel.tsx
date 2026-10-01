@@ -2,7 +2,7 @@
  * Painel de filtros do CRM (etapa, tags, telefone/email).
  * Modal fixo com scroll e zoom — lista longa de tags não corta.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { IconFilter, IconX } from '@/shared/icons'
 import { ModalZoomBar, useModalZoom } from '@/shared/ui/ModalZoom'
 import { useCrm, type CrmFiltro } from '../store/crmStore'
@@ -19,6 +19,7 @@ export function FiltroPanel({ aberto, onToggle, onClose }: Props) {
     useCrm()
   const { tags: catalogTags } = useTags()
   const { zoom, zoomIn, zoomOut, zoomReset } = useModalZoom()
+  const [buscaTag, setBuscaTag] = useState('')
 
   const tags = useMemo(() => {
     const set = new Set<string>()
@@ -28,6 +29,12 @@ export function FiltroPanel({ aberto, onToggle, onClose }: Props) {
     }
     return [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'))
   }, [contatos, catalogTags])
+
+  const tagsFiltradas = useMemo(() => {
+    const q = buscaTag.trim().toLowerCase()
+    if (!q) return tags
+    return tags.filter((t) => t.toLowerCase().includes(q))
+  }, [tags, buscaTag])
 
   const ativo =
     filtro.colunaIds.length > 0 ||
@@ -120,9 +127,35 @@ export function FiltroPanel({ aberto, onToggle, onClose }: Props) {
 
               {tags.length > 0 ? (
                 <section className="filtro-sec">
-                  <h4>Tags</h4>
+                  <div className="filtro-sec-title-row">
+                    <h4>Tags</h4>
+                    {filtro.tags.length > 0 ? (
+                      <span className="filtro-count-badge">
+                        {filtro.tags.length} selecionada{filtro.tags.length > 1 ? 's' : ''}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="filtro-search-wrap">
+                    <input
+                      type="text"
+                      className="input filtro-search-input"
+                      placeholder="Pesquisar tags..."
+                      value={buscaTag}
+                      onChange={(e) => setBuscaTag(e.target.value)}
+                    />
+                    {buscaTag ? (
+                      <button
+                        type="button"
+                        className="filtro-search-clear"
+                        onClick={() => setBuscaTag('')}
+                        aria-label="Limpar pesquisa"
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </div>
                   <div className="filtro-chips">
-                    {tags.map((t) => (
+                    {tagsFiltradas.map((t) => (
                       <button
                         key={t}
                         type="button"
@@ -132,6 +165,11 @@ export function FiltroPanel({ aberto, onToggle, onClose }: Props) {
                         {t}
                       </button>
                     ))}
+                    {tagsFiltradas.length === 0 ? (
+                      <p className="empty-hint" style={{ width: '100%', margin: '4px 0' }}>
+                        Nenhuma tag encontrada para &quot;{buscaTag}&quot;
+                      </p>
+                    ) : null}
                   </div>
                 </section>
               ) : null}

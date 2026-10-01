@@ -2,7 +2,7 @@
  * Painel lateral para gerenciar o catálogo de tags.
  * Lista simples com adicionar/remover, estilo leve como Campos.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IconX } from '@/shared/icons'
 import { useResizableWidth } from '@/shared/lib/useResizableWidth'
 import { useTags } from './tagsStore'
@@ -12,6 +12,7 @@ type Props = { onClose: () => void }
 export function TagsPanel({ onClose }: Props) {
   const { tags, criarTag, removerTag } = useTags()
   const [nova, setNova] = useState('')
+  const [busca, setBusca] = useState('')
   const [erro, setErro] = useState('')
   const { cssWidth, startResize, canResize } = useResizableWidth({
     storageKey: 'techfala-tags-panel-w',
@@ -38,7 +39,10 @@ export function TagsPanel({ onClose }: Props) {
     }
   }
 
-  const ativas = tags.filter((t) => t.ativo)
+  const ativas = useMemo(() => {
+    const q = busca.trim().toLowerCase()
+    return tags.filter((t) => t.ativo && (!q || t.nome.toLowerCase().includes(q)))
+  }, [tags, busca])
 
   return (
     <div className="campos-overlay" role="presentation" onClick={onClose}>
@@ -74,6 +78,14 @@ export function TagsPanel({ onClose }: Props) {
         </header>
 
         <div className="campos-lista-scroll">
+          <input
+            className="input"
+            placeholder="Pesquisar tags cadastradas..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            style={{ marginBottom: '0.75rem' }}
+          />
+
           <div className="inline-add" style={{ marginBottom: '1rem' }}>
             <input
               className="input"

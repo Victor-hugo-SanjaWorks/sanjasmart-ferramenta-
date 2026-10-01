@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import { IconGrip, IconX } from '@/shared/icons'
 import type { Contato } from '@/shared/types/crm'
 import { useCrm } from '../store/crmStore'
+import { formatBRL, parseValor } from '../views/viewUtils'
 
 type Props = { contato: Contato }
 
@@ -15,6 +16,8 @@ export function ContactCard({ contato }: Props) {
   const { removerContato, abrirContato } = useCrm()
   const startRef = useRef({ x: 0, y: 0 })
   const maxDistRef = useRef(0)
+
+  const valorNum = parseValor(contato.valorOportunidade)
 
   function registrarInicio(x: number, y: number) {
     startRef.current = { x, y }
@@ -57,6 +60,20 @@ export function ContactCard({ contato }: Props) {
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p className="nome">{contato.nome}</p>
+        {contato.tags && contato.tags.length > 0 ? (
+          <div className="contact-card-tags">
+            {contato.tags.map((tag) => (
+              <span key={tag} className="contact-card-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {valorNum > 0 ? (
+          <p className="meta" style={{ fontWeight: 600, color: '#047857' }}>
+            {formatBRL(valorNum)}
+          </p>
+        ) : null}
         {contato.email ? <p className="meta">{contato.email}</p> : null}
         {contato.telefone ? (
           <p className="meta">

@@ -2,7 +2,7 @@
  * Coluna do Kanban: stripe colorida, header, lista, add.
  * Aceita drop de cards e reordenação de colunas.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IconGrip, IconPlus } from '@/shared/icons'
 import type { Coluna, Contato } from '@/shared/types/crm'
 import { useCrm } from '../store/crmStore'
@@ -10,6 +10,7 @@ import { AddContactForm } from './AddContactForm'
 import { ColunaMenuButton } from './ColunaMenuButton'
 import { ColunaListaVirtual } from './ColunaListaVirtual'
 import { EmptyColumn } from './EmptyColumn'
+import { formatBRL, somaValores } from '../views/viewUtils'
 
 type Props = { coluna: Coluna; contatos: Contato[] }
 
@@ -17,6 +18,8 @@ export function KanbanColumn({ coluna, contatos }: Props) {
   const { moverContato, reordenarColunas } = useCrm()
   const [adding, setAdding] = useState(false)
   const [over, setOver] = useState(false)
+
+  const totalValor = useMemo(() => somaValores(contatos), [contatos])
 
   return (
     <div
@@ -41,41 +44,50 @@ export function KanbanColumn({ coluna, contatos }: Props) {
       <div className="col-stripe" style={{ backgroundColor: coluna.cor }} />
 
       <div className="col-header">
-        <div className="col-header-left">
-          <div
-            className="grip"
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData('text/coluna-id', coluna.id)
-              e.dataTransfer.effectAllowed = 'move'
-            }}
-          >
-            <IconGrip />
+        <div className="col-header-main">
+          <div className="col-header-left">
+            <div
+              className="grip"
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/coluna-id', coluna.id)
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+            >
+              <IconGrip />
+            </div>
+            <h3 className="col-title" title={coluna.titulo}>{coluna.titulo}</h3>
+            <span className="badge">{contatos.length}</span>
           </div>
-          <h3 className="col-title">{coluna.titulo}</h3>
-          <span className="badge">{contatos.length}</span>
+
+          <ColunaMenuButton colunaId={coluna.id} titulo={coluna.titulo} cor={coluna.cor} contatosCount={contatos.length} />
         </div>
 
-        <ColunaMenuButton colunaId={coluna.id} titulo={coluna.titulo} cor={coluna.cor} contatosCount={contatos.length} />
+        <div className="col-header-sub">
+          <span className={`col-total-valor${totalValor > 0 ? ' has-value' : ''}`} title="Valor total de oportunidades na etapa">
+            {formatBRL(totalValor)}
+          </span>
+        </div>
       </div>
 
       <div className="col-body">
         {contatos.length === 0 ? <EmptyColumn /> : null}
         {contatos.length > 0 ? <ColunaListaVirtual contatos={contatos} /> : null}
-        {adding ? (
-          <AddContactForm colunaId={coluna.id} onClose={() => setAdding(false)} />
-        ) : null}
       </div>
 
       <div className="col-footer">
-        <button
-          type="button"
-          className="btn btn-ghost btn-add-contact"
-          onClick={() => setAdding(true)}
-        >
-          <IconPlus />
-          <span>Adicionar contato</span>
-        </button>
+        {adding ? (
+          <AddContactForm colunaId={coluna.id} onClose={() => setAdding(false)} />
+        ) : (
+          <button
+            type="button"
+            className="btn btn-ghost btn-add-contact"
+            onClick={() => setAdding(true)}
+          >
+            <IconPlus />
+            <span>Adicionar contato</span>
+          </button>
+        )}
       </div>
     </div>
   )

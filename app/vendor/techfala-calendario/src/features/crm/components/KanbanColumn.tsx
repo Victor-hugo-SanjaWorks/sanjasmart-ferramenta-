@@ -2,13 +2,14 @@
  * Coluna do Kanban: stripe colorida, header, lista, add.
  * Aceita drop de cards e reordenação de colunas.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IconEllipsis, IconGrip, IconPlus } from '@/shared/icons'
 import type { Coluna, Contato } from '@/shared/types/crm'
 import { useCrm } from '../store/crmStore'
 import { AddContactForm } from './AddContactForm'
 import { ContactCard } from './ContactCard'
 import { EmptyColumn } from './EmptyColumn'
+import { formatBRL, somaValores } from '../views/viewUtils'
 
 type Props = { coluna: Coluna; contatos: Contato[] }
 
@@ -18,6 +19,8 @@ export function KanbanColumn({ coluna, contatos }: Props) {
   const [adding, setAdding] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [over, setOver] = useState(false)
+
+  const totalValor = useMemo(() => somaValores(contatos), [contatos])
 
   return (
     <div
@@ -42,54 +45,62 @@ export function KanbanColumn({ coluna, contatos }: Props) {
       <div className="col-stripe" style={{ backgroundColor: coluna.cor }} />
 
       <div className="col-header">
-        <div className="col-header-left">
-          <div
-            className="grip"
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData('text/coluna-id', coluna.id)
-              e.dataTransfer.effectAllowed = 'move'
-            }}
-          >
-            <IconGrip />
+        <div className="col-header-main">
+          <div className="col-header-left">
+            <div
+              className="grip"
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/coluna-id', coluna.id)
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+            >
+              <IconGrip />
+            </div>
+            <h3 className="col-title" title={coluna.titulo}>{coluna.titulo}</h3>
+            <span className="badge">{contatos.length}</span>
           </div>
-          <h3 className="col-title">{coluna.titulo}</h3>
-          <span className="badge">{contatos.length}</span>
+
+          <div className="col-menu">
+            <button
+              type="button"
+              className="btn btn-ghost btn-icon sm"
+              aria-label="Menu da coluna"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <IconEllipsis />
+            </button>
+            {menuOpen ? (
+              <div className="col-menu-panel">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const titulo = window.prompt('Novo nome', coluna.titulo)
+                    if (titulo) renomearColuna(coluna.id, titulo)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Renomear
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => {
+                    removerColuna(coluna.id)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Remover
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        <div className="col-menu">
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon sm"
-            aria-label="Menu da coluna"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <IconEllipsis />
-          </button>
-          {menuOpen ? (
-            <div className="col-menu-panel">
-              <button
-                type="button"
-                onClick={() => {
-                  const titulo = window.prompt('Novo nome', coluna.titulo)
-                  if (titulo) renomearColuna(coluna.id, titulo)
-                  setMenuOpen(false)
-                }}
-              >
-                Renomear
-              </button>
-              <button
-                type="button"
-                className="danger"
-                onClick={() => {
-                  removerColuna(coluna.id)
-                  setMenuOpen(false)
-                }}
-              >
-                Remover
-              </button>
-            </div>
-          ) : null}
+        <div className="col-header-sub">
+          <span className={`col-total-valor${totalValor > 0 ? ' has-value' : ''}`} title="Valor total de oportunidades na etapa">
+            {formatBRL(totalValor)}
+          </span>
         </div>
       </div>
 
@@ -98,20 +109,21 @@ export function KanbanColumn({ coluna, contatos }: Props) {
         {contatos.map((c) => (
           <ContactCard key={c.id} contato={c} />
         ))}
-        {adding ? (
-          <AddContactForm colunaId={coluna.id} onClose={() => setAdding(false)} />
-        ) : null}
       </div>
 
       <div className="col-footer">
-        <button
-          type="button"
-          className="btn btn-ghost btn-add-contact"
-          onClick={() => setAdding(true)}
-        >
-          <IconPlus />
-          <span>Adicionar contato</span>
-        </button>
+        {adding ? (
+          <AddContactForm colunaId={coluna.id} onClose={() => setAdding(false)} />
+        ) : (
+          <button
+            type="button"
+            className="btn btn-ghost btn-add-contact"
+            onClick={() => setAdding(true)}
+          >
+            <IconPlus />
+            <span>Adicionar contato</span>
+          </button>
+        )}
       </div>
     </div>
   )
