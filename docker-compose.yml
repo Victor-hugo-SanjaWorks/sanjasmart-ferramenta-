@@ -14,6 +14,8 @@ services:
       - ./data/crm-arquivos:/app/data/crm-arquivos
       - ./app/dist:/app/dist:ro
       - ./app/public/crm:/app/public/crm:ro
+      - ./app/public/dashboard:/app/public/dashboard:ro
+      - ./app/public/js:/app/public/js:ro
       - ./app/public/phone.html:/app/public/phone.html:ro
       - ./app/public/path-base.js:/app/public/path-base.js:ro
       - ./app/public/prompt-markup.js:/app/public/prompt-markup.js:ro

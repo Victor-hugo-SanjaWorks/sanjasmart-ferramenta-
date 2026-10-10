@@ -27,6 +27,7 @@ import { atualizarUsuarioChatwoot } from './chatwoot-usuarios.js';
 import { mensagemPublicaAtendimento } from './mensagens-publicas.js';
 import { rotasUsuariosPainel } from './usuarios-rotas.js';
 import { rotasCrm } from './crm-rotas.js';
+import { rotasCrmDashboard } from './crm-dashboard-rotas.js';
 import { rotasWhatsappPainel } from './whatsapp-rotas.js';
 import { rotasFilaAtendimento } from './fila-atendimento-rotas.js';
 import { rotasCalendario } from './calendario-rotas.js';
@@ -505,6 +506,7 @@ export async function criarServidor() {
   await app.register(rotasChatwootSso);
   await app.register(rotasUsuariosPainel);
   await app.register(rotasCrm);
+  await app.register(rotasCrmDashboard);
   await app.register(rotasWhatsappPainel);
   await app.register(rotasFilaAtendimento);
   if (config.calendarioHabilitado) {

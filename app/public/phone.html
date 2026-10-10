@@ -907,10 +907,11 @@
       overflow: hidden;
     }
     #view-crm,
+    #view-dashboard,
     #view-calendario,
     #view-campanhas {
       padding: 0;
-      background: #fff;
+      background: #060913;
       border-radius: var(--radius-lg);
       overflow: hidden;
       flex-direction: column;
@@ -918,6 +919,7 @@
       height: 100%;
     }
     #crm-frame,
+    #dashboard-frame,
     #calendario-frame,
     #campanhas-frame {
       width: 100%;
@@ -926,7 +928,7 @@
       flex: 1 1 auto;
       min-height: 0;
       display: block;
-      background: #fff;
+      background: #060913;
     }
     #view-prompt {
       overflow: hidden;
@@ -4410,6 +4412,18 @@
             </span>
             <span class="nav-label">CRM</span>
           </button>
+          <button type="button" class="nav-item" data-view="dashboard" onclick="switchView('dashboard')">
+            <span class="nav-icon-wrap">
+              <span class="nav-icon">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 16.5H17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M4 13.5L8 9.5L11.5 12.5L16 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13 6.5H16V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </span>
+            <span class="nav-label">Dashboard</span>
+          </button>
           <button type="button" class="nav-item" data-view="calendario" id="nav-calendario" onclick="switchView('calendario')" style="display:none">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
@@ -4871,6 +4885,16 @@
           <iframe
             id="crm-frame"
             title="CRM"
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+        </div>
+      </div>
+
+      <div id="view-dashboard" class="view">
+        <div class="chat-wrap">
+          <iframe
+            id="dashboard-frame"
+            title="BI Comercial"
             allow="clipboard-read; clipboard-write"
           ></iframe>
         </div>
@@ -5919,6 +5943,9 @@
       if (view === 'crm') {
         garantirCrmFrame();
       }
+      if (view === 'dashboard') {
+        garantirDashboardFrame();
+      }
       if (view === 'calendario') {
         if (!window.__UI_FLAGS__ || !window.__UI_FLAGS__.calendario) {
           switchView('assistente');
@@ -5963,6 +5990,17 @@
         frame.setAttribute('data-crm-ok', '1');
       };
       frame.src = '/crm/?v=' + Date.now();
+    }
+
+    function garantirDashboardFrame() {
+      var frame = document.getElementById('dashboard-frame');
+      if (!frame) return;
+      if (frame.getAttribute('src') && frame.getAttribute('data-dash-ok') === '1') return;
+      frame.setAttribute('data-dash-ok', '0');
+      frame.onload = function () {
+        frame.setAttribute('data-dash-ok', '1');
+      };
+      frame.src = '/dashboard/?v=' + Date.now();
     }
 
     function garantirCalendarioFrame() {

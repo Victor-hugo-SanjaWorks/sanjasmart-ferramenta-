@@ -8,6 +8,7 @@
     'prompt',
     'conversas',
     'crm',
+    'dashboard',
     'calendario',
     'campanhas',
     'proativos',
