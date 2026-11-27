@@ -17,6 +17,7 @@ services:
       - ./app/public/dashboard:/app/public/dashboard:ro
       - ./app/public/js:/app/public/js:ro
       - ./app/public/phone.html:/app/public/phone.html:ro
+      - ./app/public/tema-sanja.css:/app/public/tema-sanja.css:ro
       - ./app/public/path-base.js:/app/public/path-base.js:ro
       - ./app/public/prompt-markup.js:/app/public/prompt-markup.js:ro
       - ./app/public/prompt-editor-ux.js:/app/public/prompt-editor-ux.js:ro

@@ -2312,107 +2312,6 @@
 
     .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
-    /* Botões 3D estilo Uiverse — adaptados Tilit (exceto toolbar do prompt) */
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave) {
-      appearance: button;
-      position: relative;
-      box-sizing: border-box;
-      border: solid transparent;
-      border-radius: 14px;
-      border-width: 0 0 4px;
-      color: #fff;
-      cursor: pointer;
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: inherit;
-      letter-spacing: 0.6px;
-      line-height: 20px;
-      margin: 0;
-      outline: none;
-      overflow: visible;
-      padding: 11px 18px;
-      text-align: center;
-      text-transform: uppercase;
-      touch-action: manipulation;
-      transform: translateZ(0);
-      transition: filter 0.2s, padding-bottom 0.1s, border-width 0.1s;
-      user-select: none;
-      vertical-align: middle;
-      white-space: nowrap;
-      z-index: 0;
-      --btn-face: #252849;
-      --btn-edge: #111224;
-      background-color: var(--btn-face);
-      border-bottom-color: var(--btn-edge);
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave)::after {
-      content: '';
-      position: absolute;
-      background-color: var(--btn-highlight, var(--btn-face));
-      border: solid transparent;
-      border-radius: 14px;
-      border-width: 0 0 4px;
-      border-bottom-color: var(--btn-edge);
-      bottom: -4px;
-      left: 0;
-      right: 0;
-      top: 0;
-      z-index: -1;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave):not(:disabled):hover {
-      filter: brightness(1.1);
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave):not(:disabled):active {
-      border-width: 0 0 0;
-      padding-bottom: 8px;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave):not(:disabled):active::after {
-      border-width: 0 0 0;
-      bottom: 0;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave):focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(17, 18, 36, 0.2);
-    }
-
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave).primary {
-      --btn-face: #252849;
-      --btn-highlight: #32365c;
-      --btn-edge: #111224;
-      color: #fff;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave).secondary {
-      --btn-face: #ffffff;
-      --btn-highlight: #f5f7fa;
-      --btn-edge: #c8cdd8;
-      color: #111224;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave).danger {
-      --btn-face: #cb2e4f;
-      --btn-highlight: #e53935;
-      --btn-edge: #9a1f3a;
-      color: #fff;
-    }
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave).success {
-      --btn-face: #2e9e2e;
-      --btn-highlight: #3cb83c;
-      --btn-edge: #1a6b1a;
-      color: #fff;
-    }
-    .app-shell button.btn-icon:not(.nav-item):not(.modal-close) {
-      padding: 8px 14px;
-      font-size: 11px;
-      letter-spacing: 0.4px;
-    }
-
-    .app-shell button:not(.nav-item):not(.modal-close):not(.pte-btn):not(.pte-autosave):disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      filter: none !important;
-      transform: none !important;
-    }
-
     .modal-close {
       appearance: button;
       background: rgba(255, 255, 255, 0.8);
@@ -2588,24 +2487,24 @@
       flex: 1;
       min-height: 0;
       overflow: auto;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 10px;
       background: #fff;
-      box-shadow: 3px 4px 0 #E99F4C;
+      box-shadow: none;
     }
     .usuarios-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      color: #264143;
+      color: #101828;
       font-size: 13px;
     }
     .usuarios-table thead th {
       position: sticky;
       top: 0;
       z-index: 1;
-      background: #f7ebe8;
-      border-bottom: 2px solid #264143;
+      background: #e8efff;
+      border-bottom: 1px solid #d0d5dd;
       padding: 12px 14px;
       font-size: 12px;
       font-weight: 800;
@@ -2626,11 +2525,11 @@
     .usuarios-badge {
       display: inline-block;
       padding: 4px 8px;
-      border: 1.5px solid #264143;
+      border: 1.5px solid #d0d5dd;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 800;
-      background: #EDDCD9;
+      background: #ffffff;
       white-space: nowrap;
     }
     .usuarios-badge.off { opacity: 0.45; background: #fff; }
@@ -2645,10 +2544,10 @@
       font-size: 10px;
       font-weight: 700;
       padding: 3px 6px;
-      border: 1.5px solid #264143;
+      border: 1.5px solid #d0d5dd;
       border-radius: 4px;
       background: #e3eef9;
-      color: #264143;
+      color: #101828;
     }
     .usuarios-deptos-inline .u-muted { background: #fff; opacity: 0.6; }
     #modal-filas .senha-modal-wrap.filas-modal-wrap {
@@ -2689,7 +2588,7 @@
     .filas-side-btn {
       width: 100%;
       text-align: left;
-      border: 1.5px solid #264143;
+      border: 1.5px solid #d0d5dd;
       background: #fff;
       border-radius: 8px;
       padding: 10px 12px;
@@ -2697,10 +2596,10 @@
       cursor: pointer;
       font-weight: 700;
       font-size: 13px;
-      color: #264143;
+      color: #101828;
     }
     .filas-side-btn small { display: block; font-weight: 600; opacity: 0.65; margin-top: 2px; }
-    .filas-side-btn.active { background: #EDDCD9; }
+    .filas-side-btn.active { background: #ffffff; }
     .filas-main { overflow: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 16px; }
     .fila-main-head {
       display: flex;
@@ -2765,9 +2664,9 @@
       font-size: 10px;
       font-weight: 700;
       padding: 3px 6px;
-      border: 1.5px solid #264143;
+      border: 1.5px solid #d0d5dd;
       border-radius: 4px;
-      background: #EDDCD9;
+      background: #ffffff;
     }
     .usuarios-abas-inline span.off { opacity: 0.3; background: #fff; }
     .usuarios-row-actions {
@@ -2781,10 +2680,10 @@
       font-weight: 800;
       padding: 7px 10px;
       border-radius: 6px;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       background: #fff;
-      color: #264143;
-      box-shadow: 1px 1px 0 #E99F4C;
+      color: #101828;
+      box-shadow: none;
       cursor: pointer;
       font-family: inherit;
     }
@@ -2819,9 +2718,9 @@
     }
     .usr-section {
       background: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 12px;
-      box-shadow: 3px 3px 0 #E99F4C;
+      box-shadow: none;
       padding: 14px 16px 16px;
     }
     .usr-section-head {
@@ -2837,7 +2736,7 @@
       width: 28px;
       height: 28px;
       border-radius: 8px;
-      background: #264143;
+      background: #101828;
       color: #fff;
       font-size: 13px;
       font-weight: 800;
@@ -2850,7 +2749,7 @@
       margin: 0;
       font-size: 15px;
       font-weight: 800;
-      color: #264143;
+      color: #101828;
       letter-spacing: -0.2px;
       line-height: 1.2;
     }
@@ -2877,13 +2776,13 @@
       flex-direction: column;
       gap: 4px;
       padding: 12px 14px;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 10px;
       background: #fff;
       cursor: pointer;
       text-align: left;
       font-family: inherit;
-      color: #264143;
+      color: #101828;
       box-shadow: 2px 2px 0 transparent;
       transition: background .15s, box-shadow .15s, transform .15s;
     }
@@ -2892,8 +2791,8 @@
       transform: translateY(-1px);
     }
     .usr-role-card.active {
-      background: #f7ebe8;
-      box-shadow: 2px 2px 0 #E99F4C;
+      background: #e8efff;
+      box-shadow: none;
     }
     .usr-role-card strong {
       font-size: 14px;
@@ -2955,14 +2854,14 @@
       max-width: none;
       padding: 10px 12px;
       background: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 8px;
-      box-shadow: 1px 1px 0 #E99F4C;
+      box-shadow: none;
       cursor: pointer;
       box-sizing: border-box;
-      color: #264143;
+      color: #101828;
     }
-    .usr-toggle-item:has(input:checked) { background: #f7ebe8; }
+    .usr-toggle-item:has(input:checked) { background: #e8efff; }
     .usr-toggle-text {
       display: flex;
       flex-direction: column;
@@ -2993,7 +2892,7 @@
       position: absolute;
       inset: 0;
       background: #cfc0bd;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 999px;
       transition: background .2s ease;
       box-sizing: border-box;
@@ -3006,12 +2905,12 @@
       left: 2px;
       top: 2px;
       background: #fff;
-      border: 1.5px solid #264143;
+      border: 1.5px solid #d0d5dd;
       border-radius: 50%;
       transition: transform .2s ease;
       box-sizing: border-box;
     }
-    .usr-switch input:checked + .track { background: #DE5499; }
+    .usr-switch input:checked + .track { background: #145cff; }
     .usr-switch input:checked + .track::before { transform: translateX(20px); }
     .usuarios-abas-actions {
       display: flex;
@@ -3024,11 +2923,11 @@
       font-size: 12px;
       font-weight: 700;
       padding: 8px 12px;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 6px;
       background: #fff;
-      color: #264143;
-      box-shadow: 1px 1px 0 #E99F4C;
+      color: #101828;
+      box-shadow: none;
       cursor: pointer;
       font-family: inherit;
     }
@@ -3042,14 +2941,14 @@
       margin: 0;
       padding: 10px 12px;
       background: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 8px;
-      box-shadow: 2px 2px 0 #E99F4C;
+      box-shadow: none;
       box-sizing: border-box;
       cursor: pointer;
       font-weight: 700;
       font-size: 13px;
-      color: #264143;
+      color: #101828;
       text-align: left;
     }
     #modal-usuarios .senha-check-row .aba-desc {
@@ -3068,7 +2967,7 @@
       position: sticky;
       bottom: 0;
       padding-top: 8px;
-      background: linear-gradient(to top, #f7ebe8 70%, transparent);
+      background: linear-gradient(to top, #e8efff 70%, transparent);
     }
     .usuarios-form-actions .senha-btn,
     .usuarios-form-actions .senha-btn-ghost {
@@ -3141,11 +3040,11 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      background-color: #EDDCD9;
+      background-color: #ffffff;
       width: 100%;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 20px;
-      box-shadow: 3px 4px 0px 1px #E99F4C;
+      box-shadow: none;
       padding: 8px 12px 20px;
       font-family: inherit;
     }
@@ -3155,14 +3054,14 @@
       right: 12px;
       width: 32px;
       height: 32px;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 8px;
       background: #fff;
-      color: #264143;
+      color: #101828;
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
-      box-shadow: 2px 2px 0 0 #E99F4C;
+      box-shadow: none;
       padding: 0;
       display: flex;
       align-items: center;
@@ -3172,18 +3071,18 @@
     .senha-close:hover { opacity: .9; }
     .senha-close:focus {
       transform: translateY(2px);
-      box-shadow: 1px 1px 0 0 #E99F4C;
+      box-shadow: none;
       outline: none;
     }
     .senha-title {
-      color: #264143;
+      color: #101828;
       font-weight: 900;
       font-size: 1.5em;
       margin: 20px 0 4px;
       letter-spacing: 0.02em;
     }
     .senha-account {
-      color: #264143;
+      color: #101828;
       font-weight: 600;
       font-size: 13px;
       margin: 0 0 8px;
@@ -3199,27 +3098,27 @@
     .senha-sub_title {
       font-weight: 600;
       margin: 5px 0;
-      color: #264143;
+      color: #101828;
       font-size: 14px;
     }
     .senha-form_style {
       outline: none;
-      border: 2px solid #264143;
-      box-shadow: 3px 4px 0px 1px #E99F4C;
+      border: 1px solid #d0d5dd;
+      box-shadow: none;
       width: 100%;
       max-width: 290px;
       padding: 12px 10px;
       border-radius: 4px;
       font-size: 15px;
       background: #fff;
-      color: #264143;
+      color: #101828;
       transition: transform .15s ease, box-shadow .15s ease;
       box-sizing: border-box;
     }
     .senha-form_style::placeholder { color: #8a9a9c; }
     .senha-form_style:focus {
       transform: translateY(4px);
-      box-shadow: 1px 2px 0px 0px #E99F4C;
+      box-shadow: none;
     }
     .senha-btn {
       padding: 15px;
@@ -3227,19 +3126,19 @@
       width: calc(100% - 20px);
       max-width: 290px;
       font-size: 15px;
-      background: #DE5499;
+      background: #145cff;
       color: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 10px;
       font-weight: 800;
-      box-shadow: 3px 3px 0px 0px #E99F4C;
+      box-shadow: none;
       cursor: pointer;
       transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
     }
     .senha-btn:hover { opacity: .9; }
     .senha-btn:focus {
       transform: translateY(4px);
-      box-shadow: 1px 2px 0px 0px #E99F4C;
+      box-shadow: none;
       outline: none;
     }
     .senha-form_area form {
@@ -3251,12 +3150,12 @@
     .senha-section-divider {
       width: calc(100% - 20px);
       height: 2px;
-      background: #264143;
+      background: #101828;
       opacity: 0.12;
       margin: 8px 10px 16px;
     }
     .senha-subsection-title {
-      color: #264143;
+      color: #101828;
       font-weight: 900;
       font-size: 1.05em;
       margin: 0 10px 10px;
@@ -3267,9 +3166,9 @@
       margin: 0 10px 12px;
       padding: 16px;
       background: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 4px;
-      box-shadow: 3px 4px 0px 1px #E99F4C;
+      box-shadow: none;
       min-height: 200px;
       width: calc(100% - 20px);
       max-width: 290px;
@@ -3306,9 +3205,9 @@
       margin: 0 10px 14px;
       padding: 12px 14px;
       background: #f8faf9;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 8px;
-      box-shadow: 2px 3px 0 #E99F4C;
+      box-shadow: none;
       font-size: 13px;
     }
     .wa-info-row {
@@ -3320,7 +3219,7 @@
     }
     .wa-info-row:last-child { border-bottom: none; }
     .wa-info-row span { color: #6b7c7e; font-weight: 600; }
-    .wa-info-row strong { color: #264143; text-align: right; word-break: break-all; }
+    .wa-info-row strong { color: #101828; text-align: right; word-break: break-all; }
     .wa-info-row strong.ok { color: #1a8f4a; }
     .wa-info-row strong.off { color: #c0392b; }
     .wa-instance-picker {
@@ -3334,25 +3233,25 @@
       width: 28px;
       height: 28px;
       padding: 0;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 6px;
       background: #fff;
-      color: #264143;
+      color: #101828;
       font-size: 14px;
       font-weight: 800;
       line-height: 1;
       cursor: pointer;
     }
-    .wa-instance-picker button:hover { background: #E99F4C; }
+    .wa-instance-picker button:hover { background: #145cff; }
     .wa-instance-picker select {
       flex: 1;
       min-width: 0;
       max-width: 150px;
       padding: 4px 6px;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 6px;
       background: #fff;
-      color: #264143;
+      color: #101828;
       font-size: 12px;
       font-weight: 700;
     }
@@ -3381,12 +3280,12 @@
     .senha-btn-alt {
       padding: 13px;
       font-size: 14px;
-      background: #264143;
+      background: #101828;
       color: #fff;
-      border: 2px solid #264143;
+      border: 1px solid #d0d5dd;
       border-radius: 10px;
       font-weight: 800;
-      box-shadow: 3px 3px 0px 0px #E99F4C;
+      box-shadow: none;
       cursor: pointer;
       font-family: inherit;
       transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
@@ -3394,18 +3293,18 @@
     .senha-btn-alt:hover { opacity: .9; }
     .senha-btn-alt:focus {
       transform: translateY(4px);
-      box-shadow: 1px 2px 0px 0px #E99F4C;
+      box-shadow: none;
       outline: none;
     }
     .senha-btn-ghost {
       padding: 11px;
       font-size: 13px;
       background: transparent;
-      color: #264143;
-      border: 2px solid #264143;
+      color: #101828;
+      border: 1px solid #d0d5dd;
       border-radius: 10px;
       font-weight: 700;
-      box-shadow: 2px 2px 0 0 #E99F4C;
+      box-shadow: none;
       cursor: pointer;
       font-family: inherit;
     }
@@ -4350,23 +4249,37 @@
     }
 </style>
   <link rel="stylesheet" href="midias-gatilho.css?v=20260812a">
+  <link rel="stylesheet" href="tema-sanja.css?v=20261127">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" aria-label="Menu principal">
-      <div class="sidebar-inner">
-        <div class="sidebar-brand">
+    <header class="cabecario">
+      <div class="barra-marca">
+        <div class="marca">
           <div class="sidebar-logo" title="Sanja Smart">
-            <img src="/assets/sanja-smart-logo.png?v=3" alt="Sanja Smart">
+            <img src="/assets/sanja-smart-logo-white.png?v=3" alt="Sanja Smart">
           </div>
-          <div>
-            <div class="sidebar-brand-text">Sanja Smart</div>
-            <div class="sidebar-brand-sub">Sanja Smart</div>
-          </div>
-          <button type="button" id="sidebar-recolher" title="Recolher menu (tela cheia no mobile também)" aria-label="Recolher menu" onclick="alternarSidebar(true)">«</button>
+          <div class="sidebar-brand-text">Sanja Smart</div>
         </div>
-        <nav class="sidebar-nav">
-          <button type="button" class="nav-item active" data-view="assistente" onclick="switchView('assistente')">
+        <nav class="modulos" aria-label="Módulos">
+          <button type="button" class="modulo" data-modulo="assistente">Assistente</button>
+          <button type="button" class="modulo" data-modulo="atendimento">Atendimento</button>
+          <button type="button" class="modulo" data-modulo="comercial">Comercial</button>
+        </nav>
+        <details class="conta">
+          <summary aria-label="Conta">
+            <span class="avatar" id="conta-avatar" aria-hidden="true">SS</span>
+            <span class="conta-txt"><strong id="conta-nome">Minha conta</strong><small id="conta-email"></small></span>
+          </summary>
+          <div class="menu-flutuante">
+            <button type="button" title="Alterar senha" onclick="abrirModalSenha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Minha conta</span></button>
+            <button type="button" id="btn-usuarios" title="Usuários" onclick="abrirModalUsuarios()" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Usuários</span></button>
+            <a href="/logout" title="Sair"><span aria-hidden="true">⏻</span><span>Sair</span></a>
+          </div>
+        </details>
+      </div>
+      <nav class="telas" aria-label="Telas">
+        <button type="button" class="nav-item active" data-modulo="assistente" data-view="assistente" onclick="switchView('assistente')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4377,7 +4290,7 @@
             </span>
             <span class="nav-label">Assistente</span>
           </button>
-          <button type="button" class="nav-item" data-view="prompt" onclick="switchView('prompt')">
+        <button type="button" class="nav-item" data-modulo="assistente" data-view="prompt" onclick="switchView('prompt')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4389,7 +4302,7 @@
             </span>
             <span class="nav-label">Prompt</span>
           </button>
-          <button type="button" class="nav-item" data-view="conversas" onclick="switchView('conversas')">
+        <button type="button" class="nav-item" data-modulo="atendimento" data-view="conversas" onclick="switchView('conversas')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4400,19 +4313,18 @@
             </span>
             <span class="nav-label">Conversas</span>
           </button>
-          <button type="button" class="nav-item" data-view="crm" onclick="switchView('crm')">
+        <button type="button" class="nav-item" data-modulo="atendimento" data-view="calendario" id="nav-calendario" onclick="switchView('calendario')" style="display:none">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="3" y="4" width="5.5" height="12" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
-                  <rect x="10.5" y="4" width="5.5" height="12" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M5 8h1.5M5 11h1.5M12.5 8H14M12.5 11H14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  <rect x="2.5" y="4" width="15" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M2.5 8h15M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </span>
             </span>
-            <span class="nav-label">CRM</span>
+            <span class="nav-label">Calendário</span>
           </button>
-          <button type="button" class="nav-item" data-view="dashboard" onclick="switchView('dashboard')">
+        <button type="button" class="nav-item" data-modulo="comercial" data-view="dashboard" onclick="switchView('dashboard')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4424,18 +4336,19 @@
             </span>
             <span class="nav-label">Dashboard</span>
           </button>
-          <button type="button" class="nav-item" data-view="calendario" id="nav-calendario" onclick="switchView('calendario')" style="display:none">
+        <button type="button" class="nav-item" data-modulo="comercial" data-view="crm" onclick="switchView('crm')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2.5" y="4" width="15" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M2.5 8h15M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="3" y="4" width="5.5" height="12" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="10.5" y="4" width="5.5" height="12" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5 8h1.5M5 11h1.5M12.5 8H14M12.5 11H14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
               </span>
             </span>
-            <span class="nav-label">Calendário</span>
+            <span class="nav-label">CRM</span>
           </button>
-          <button type="button" class="nav-item" data-view="campanhas" onclick="switchView('campanhas')">
+        <button type="button" class="nav-item" data-modulo="comercial" data-view="campanhas" onclick="switchView('campanhas')">
             <span class="nav-icon-wrap">
               <span class="nav-icon">
                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4446,23 +4359,8 @@
             </span>
             <span class="nav-label">Campanhas</span>
           </button>
-        </nav>
-        <div class="sidebar-footer">
-          <button type="button" class="sidebar-user" title="Alterar senha" onclick="abrirModalSenha()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-            <span>Minha conta</span>
-          </button>
-          <button type="button" class="sidebar-user" id="btn-usuarios" title="Usuários" onclick="abrirModalUsuarios()" style="display:none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span>Usuários</span>
-          </button>
-          <a href="/logout" class="sidebar-logout" title="Sair">
-            <span class="sidebar-logout-icon">⏻</span>
-            <span>Sair</span>
-          </a>
-        </div>
-      </div>
-    </aside>
+      </nav>
+    </header>
 
     <main class="main-content">
       <div class="dash-canvas">
@@ -4924,7 +4822,6 @@
     </main>
   </div>
 
-  <button type="button" id="sidebar-restaurar" title="Mostrar menu" aria-label="Mostrar menu" onclick="alternarSidebar(false)"><span class="sidebar-restaurar-ico" aria-hidden="true">»</span><span class="sidebar-restaurar-txt">Menu</span></button>
 
   <div class="modal-overlay ai-magic-overlay" id="modal-ai-magic" onclick="if(event.target===this)fecharAiMagic()">
     <div class="modal ai-magic-dialog" role="dialog" aria-labelledby="ai-magic-title">
@@ -5304,6 +5201,7 @@
 
   <script src="/js/fila-config-ui.js"></script>
     <script src="js/aba-rota.js"></script>
+    <script src="js/menu-modulos.js?v=20261127"></script>
 <script>
     let chatwootSsoUrl = null;
 
@@ -5575,7 +5473,7 @@
       const el = document.getElementById('usuarios-lista');
       if (!el) return;
       if (!usuariosCache.length) {
-        el.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;font-weight:600;color:#264143">Nenhum usuário</td></tr>';
+        el.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;font-weight:600;color:#667085">Nenhum usuário</td></tr>';
         return;
       }
       el.innerHTML = usuariosCache.map(function (u) {
@@ -5898,20 +5796,6 @@
     async function religarSelecionadas() {
       await aplicarPausaLote(telefonesSelecionadosConversas(), false);
     }
-
-    /** Recolhe/mostra a sidebar (fullscreen p/ Conversas etc.); estado persiste no navegador. */
-    function alternarSidebar(recolher) {
-      document.body.classList.toggle('sidebar-recolhida', !!recolher);
-      try { localStorage.setItem('tilit_sidebar_recolhida', recolher ? '1' : '0'); } catch (_) {}
-    }
-
-    (function restaurarEstadoSidebar() {
-      try {
-        if (localStorage.getItem('tilit_sidebar_recolhida') === '1') {
-          document.body.classList.add('sidebar-recolhida');
-        }
-      } catch (_) {}
-    })();
 
     function switchView(view) {
       view = (window.AbaRota && AbaRota.validar(view)) || view;
