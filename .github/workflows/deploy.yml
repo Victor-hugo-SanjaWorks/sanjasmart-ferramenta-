@@ -54,6 +54,7 @@ jobs:
             set -euo pipefail
             REPO="${{ github.event.repository.name }}"
             SLUG="${REPO#ferramenta-}"
+            SLUG="${SLUG%-ferramenta-}"
             SCRIPT="/root/scripts/saas-deploy-tenant.sh"
             if [ ! -x "$SCRIPT" ]; then
               echo "ERRO: script de deploy ausente: $SCRIPT"
