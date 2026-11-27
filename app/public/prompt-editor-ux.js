@@ -772,9 +772,9 @@
   function atualizarRegua() {
     var el = editor();
     if (!el) return;
-    var on = true;
+    var on = false;
     try {
-      on = localStorage.getItem(LS_REGUA) !== '0';
+      on = localStorage.getItem(LS_REGUA) === '1';
     } catch (_) {}
     var lh = parseInt(getComputedStyle(el).lineHeight, 10) || 24;
     el.style.setProperty('--regua-lh', lh + 'px');
@@ -2204,7 +2204,7 @@
     garantirZonaLivre: function () {},
     toggleRegua: function () {
       try {
-        var cur = localStorage.getItem(LS_REGUA) !== '0';
+        var cur = localStorage.getItem(LS_REGUA) === '1';
         localStorage.setItem(LS_REGUA, cur ? '0' : '1');
       } catch (_) {}
       atualizarRegua();
