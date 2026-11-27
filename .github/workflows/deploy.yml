@@ -1,18 +1,7 @@
-# Deploy automático SanjaWorks — push em main sobe o container do cliente.
-# PR só valida o build (não sobe produção).
-# Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
-# Script no servidor: /root/scripts/saas-deploy-tenant.sh
-# (espelha origin/main, descarta drift local, limpa órfãos, compose up)
-name: Deploy
+# Validação de PR SanjaWorks — deploy é feito manualmente no servidor.
+name: PR Check
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'app/**'
-      - 'docker-compose.yml'
-      - 'prompt-cliente.txt'
-      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [main]
     paths:
@@ -20,15 +9,13 @@ on:
       - 'docker-compose.yml'
       - 'prompt-cliente.txt'
       - '.github/workflows/deploy.yml'
-  workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.repository }}-${{ github.event_name }}
+  group: pr-check-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   pr-check:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -36,28 +23,3 @@ jobs:
       - name: Build da imagem (validação)
         # tag fixa: o nome do repositório pode terminar em hífen, o que o Docker recusa
         run: docker build -t pr-check ./app
-
-  deploy:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Deploy no servidor
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script_stop: true
-          command_timeout: 40m
-          script: |
-            set -euo pipefail
-            REPO="${{ github.event.repository.name }}"
-            SLUG="${REPO#ferramenta-}"
-            SLUG="${SLUG%-ferramenta-}"
-            SCRIPT="/root/scripts/saas-deploy-tenant.sh"
-            if [ ! -x "$SCRIPT" ]; then
-              echo "ERRO: script de deploy ausente: $SCRIPT"
-              exit 1
-            fi
-            bash "$SCRIPT" "$SLUG"
