@@ -34,7 +34,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build da imagem (validação)
-        run: docker build -t pr-check-${{ github.event.repository.name }} ./app
+        # tag fixa: o nome do repositório pode terminar em hífen, o que o Docker recusa
+        run: docker build -t pr-check ./app
 
   deploy:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
